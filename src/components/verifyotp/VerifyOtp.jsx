@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './VerifyOTP.css';
+import './VerifyOtp.css';
 
 function VerifyOTP() {
   const [formData, setFormData] = useState({ email: '', otp: '' });
