@@ -60,7 +60,7 @@ const { user} = useContext(AuthContext);
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/check-auth/', {
+        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/check-auth/', {
           withCredentials: true,
         });
         
@@ -85,7 +85,7 @@ const { user} = useContext(AuthContext);
       try {
         setLoading(true);
         console.log(`Fetching conversation for job ${jobId}`);
-        const response = await axios.get(`http://localhost:8000/api/conversations/job/${jobId}/`, {
+        const response = await axios.get(`https://jobseeker-69742084525.us-central1.run.app/api/conversations/job/${jobId}/`, {
           withCredentials: true,
         });
         console.log('Conversation data:', response.data);
@@ -133,7 +133,7 @@ const { user} = useContext(AuthContext);
       console.log(`WebSocket attempt ${socketRetries + 1}/${MAX_SOCKET_RETRIES}`);
 
       axios
-        .get('http://localhost:8000/api/ws-auth-token/', {
+        .get('https://jobseeker-69742084525.us-central1.run.app/api/ws-auth-token/', {
           withCredentials: true,
         })
         .then((response) => {
@@ -144,7 +144,7 @@ const { user} = useContext(AuthContext);
             throw new Error('No authentication token received');
           }
 
-          const wsUrl = `ws://localhost:8000/ws/chat/${jobId}/?token=${encodeURIComponent(token)}`;
+          const wsUrl = `wss://jobseeker-69742084525.us-central1.run.app/ws/chat/${jobId}/?token=${encodeURIComponent(token)}`;
           console.log('Connecting to WebSocket:', wsUrl);
 
           ws = new WebSocket(wsUrl);
@@ -261,13 +261,13 @@ const { user} = useContext(AuthContext);
   const getValidFileUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http')) return url;
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    return `https://jobseeker-69742084525.us-central1.run.app${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   const recoverFile = async (messageId) => {
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/conversations/file-recovery/',
+        'https://jobseeker-69742084525.us-central1.run.app/api/conversations/file-recovery/',
         { message_id: messageId },
         { withCredentials: true }
       );
@@ -290,7 +290,7 @@ const { user} = useContext(AuthContext);
     formData.append('file', file);
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/conversations/job/${jobId}/file/`,
+        `https://jobseeker-69742084525.us-central1.run.app/api/conversations/job/${jobId}/file/`,
         formData,
         {
           withCredentials: true,

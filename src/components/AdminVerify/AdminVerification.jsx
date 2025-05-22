@@ -92,7 +92,7 @@ const VerificationItem = React.memo(({ request, onVerify, onDenyClick }) => {
         <p><strong>Status:</strong> {request.verify_status}</p>
         {request.verify_doc ? (
           <a
-            href={`http://localhost:8000${request.verify_doc}`}
+            href={`https://jobseeker-69742084525.us-central1.run.app${request.verify_doc}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -138,7 +138,7 @@ function AdminProfessionalVerification() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/admin/verification-requests/', {
+        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/admin/verification-requests/', {
           withCredentials: true,
         });
         setRequests(response.data);
@@ -189,7 +189,7 @@ function AdminProfessionalVerification() {
       if (reason) requestData.denial_reason = reason;
       
       const response = await axios.post(
-        `http://localhost:8000/api/admin/verify-professional/${professionalId}/`,
+        `https://jobseeker-69742084525.us-central1.run.app/api/admin/verify-professional/${professionalId}/`,
         requestData,
         { withCredentials: true }
       );

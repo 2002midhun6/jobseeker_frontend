@@ -13,7 +13,7 @@ function AdminUserManagement() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/users/', {
+        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/users/', {
           withCredentials: true,
         });
         setUsers(response.data);
@@ -29,7 +29,7 @@ function AdminUserManagement() {
   const handleBlockUnblock = async (userId, isBlocked) => {
     try {
       const response = await axios.patch(
-        `http://localhost:8000/api/users/${userId}/block-unblock/`,
+        `https://jobseeker-69742084525.us-central1.run.app/api/users/${userId}/block-unblock/`,
         { is_blocked: !isBlocked },
         { withCredentials: true }
       );

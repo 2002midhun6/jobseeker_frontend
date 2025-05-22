@@ -16,7 +16,7 @@ const Notifications = () => {
   // Helper function to get WebSocket token
   const getWebSocketToken = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/websocket-token/', {
+      const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/websocket-token/', {
         withCredentials: true
       });
       return response.data.access_token;
@@ -33,7 +33,7 @@ const Notifications = () => {
     // Fetch existing notifications
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/notifications/', {
+        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/notifications/', {
           withCredentials: true
         });
         setNotifications(response.data);
@@ -51,7 +51,7 @@ const Notifications = () => {
       const token = await getWebSocketToken();
       if (!token) return;
 
-      const ws = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
+      const ws = new WebSocket(`wss://jobseeker-69742084525.us-central1.run.app/ws/notifications/?token=${token}`);
       
       ws.onopen = () => {
         console.log('Notification WebSocket connected');

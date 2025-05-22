@@ -21,7 +21,8 @@ function AdminComplaintManagement() {
   const fetchComplaints = async () => {
     try {
       setLoading(true);
-      let url = 'http://localhost:8000/api/admin/complaints/';
+      let url = 'https://jobseeker-69742084525.us-central1.run.app/api/admin/complaints/';
+      // let url = 'http://localhost:8000/api/admin/complaints/';
       
       // Add query parameters
       const params = new URLSearchParams();
@@ -53,7 +54,7 @@ function AdminComplaintManagement() {
   const handleStatusChange = async (complaintId, newStatus) => {
     try {
       await axios.patch(
-        `http://localhost:8000/api/complaints/${complaintId}/`,
+        `https://jobseeker-69742084525.us-central1.run.app/api/complaints/${complaintId}/`,
         { status: newStatus },
         { withCredentials: true }
       );

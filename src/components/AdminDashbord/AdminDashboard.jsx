@@ -24,15 +24,15 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         // Fetch user counts
-        const userResponse = await axios.get('http://localhost:8000/api/users/counts/', {
+        const userResponse = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/users/counts/', {
           withCredentials: true,
         });
         // Fetch job counts
-        const jobResponse = await axios.get('http://localhost:8000/api/jobs/counts/', {
+        const jobResponse = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/jobs/counts/', {
           withCredentials: true,
         });
         // Fetch payment total
-        const paymentResponse = await axios.get('http://localhost:8000/api/payments/total/', {
+        const paymentResponse = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/payments/total/', {
           withCredentials: true,
         });
 
