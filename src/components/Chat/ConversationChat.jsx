@@ -18,6 +18,11 @@ function ImageModal({ isOpen, onClose, imageSrc }) {
     </div>
   );
 }
+const isValidDate = (dateString) => {
+  if (!dateString) return false;
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date.getTime());
+};
 
 function ConversationChat() {
   const { jobId } = useParams();
@@ -155,13 +160,19 @@ const { user} = useContext(AuthContext);
             try {
               const data = JSON.parse(event.data);
               console.log('Received:', data);
-
+          
+              // Handle heartbeat messages separately - don't add to chat
+             
+          
               if (data.event === 'user_joined' || data.event === 'user_left') {
                 console.log(`User ${data.event}:`, data);
+                // Optionally add a system message for user join/leave
+                // addSystemMessage(`${data.user_name} ${data.event === 'user_joined' ? 'joined' : 'left'} the chat`);
               } else if (data.error) {
                 setSocketError(data.error);
                 console.error('WebSocket error message:', data.error);
-              } else {
+              } else if (data.id && data.content) {
+                // Only add messages that have both ID and content
                 setMessages((prev) => {
                   if (prev.some((msg) => msg.id === data.id)) return prev;
                   return [...prev, data];
@@ -171,7 +182,6 @@ const { user} = useContext(AuthContext);
               console.error('Parse error:', error, event.data);
             }
           };
-
           ws.onerror = (error) => {
             console.error('WebSocket error:', error);
             setSocketConnected(false);
@@ -310,14 +320,35 @@ const { user} = useContext(AuthContext);
 
   const groupMessagesByDate = () => {
     const groups = {};
-    messages.forEach((message) => {
-      const date = new Date(message.created_at).toLocaleDateString();
-      if (!groups[date]) groups[date] = [];
-      groups[date].push(message);
+    
+    // Filter out non-chat messages and messages with invalid dates
+    const validMessages = messages.filter((message) => {
+      // Skip heartbeat and other system messages that shouldn't be displayed
+      if (message.type === 'system') {
+        return false;
+      }
+      
+      // Skip messages without valid timestamps
+      if (!isValidDate(message.created_at)) {
+        console.warn('Message with invalid timestamp:', message);
+        return false;
+      }
+      
+      return true;
     });
+    
+    validMessages.forEach((message) => {
+      try {
+        const date = new Date(message.created_at).toLocaleDateString();
+        if (!groups[date]) groups[date] = [];
+        groups[date].push(message);
+      } catch (error) {
+        console.error('Error processing message date:', error, message);
+      }
+    });
+    
     return groups;
   };
-
   const messageGroups = groupMessagesByDate();
 
   const openImageModal = (imageSrc) => {
