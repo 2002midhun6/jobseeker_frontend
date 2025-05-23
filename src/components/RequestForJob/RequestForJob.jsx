@@ -25,7 +25,7 @@ function ClientJobApplications() {
       
 
       try {
-        const response = await axios.get(`http://localhost:8000/api/job-applications/${jobId}/`, {
+        const response = await axios.get(`https://jobseeker-69742084525.us-central1.run.app/api/job-applications/${jobId}/`, {
           withCredentials: true,
           
         });
@@ -67,7 +67,7 @@ function ClientJobApplications() {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/accept-application/${applicationId}/`,
+        `https://jobseeker-69742084525.us-central1.run.app/api/accept-application/${applicationId}/`,
         {},
         {
           withCredentials: true,
@@ -86,7 +86,7 @@ function ClientJobApplications() {
         handler: async function (response) {
           try {
             const verifyResponse = await axios.post(
-              'http://localhost:8000/api/verify-payment/',
+              'https://jobseeker-69742084525.us-central1.run.app/api/verify-payment/',
               {
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_order_id: response.razorpay_order_id,

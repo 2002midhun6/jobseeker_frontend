@@ -21,7 +21,7 @@ function VerifyOTP() {
     try {
       setError('');
       setSuccess('');
-      await axios.post('http://localhost:8000/api/verify-otp/', formData, {
+      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/verify-otp/', formData, {
         withCredentials: true,
       });
       setSuccess('Email verified successfully!');

@@ -149,7 +149,7 @@ const Notifications = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.post('http://localhost:8000/api/notifications/mark-read/', {
+      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/notifications/mark-read/', {
         notification_id: notificationId
       }, {
         withCredentials: true
@@ -171,7 +171,7 @@ const Notifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      await axios.post('http://localhost:8000/api/notifications/mark-all-read/', {}, {
+      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/notifications/mark-all-read/', {}, {
         withCredentials: true
       });
       

@@ -23,7 +23,7 @@ function EditProject() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/jobs/${job_id}/`, {
+        const response = await axios.get(`https://jobseeker-69742084525.us-central1.run.app/api/jobs/${job_id}/`, {
           withCredentials: true,
         });
         const { title, description, budget, deadline, advance_payment } = response.data;
@@ -102,7 +102,7 @@ function EditProject() {
         payload.advance_payment = null;
       }
       const response = await axios.put(
-        `http://localhost:8000/api/jobs/${job_id}/`,
+        `https://jobseeker-69742084525.us-central1.run.app/api/jobs/${job_id}/`,
         payload,
         { withCredentials: true }
       );

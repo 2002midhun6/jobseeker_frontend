@@ -16,7 +16,7 @@ function ProfessionalHeader() {
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:8000/api/logout/', {}, { withCredentials: true });
+      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/logout/', {}, { withCredentials: true });
       dispatch({ type: 'LOGOUT' });
       navigate('/login');
     } catch (err) {
@@ -30,7 +30,7 @@ function ProfessionalHeader() {
 
   const fetchUnreadCount = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/conversations/unread-count/', {
+      const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/conversations/unread-count/', {
         withCredentials: true,
       });
       setUnreadMessagesCount(response.data.unread_count);

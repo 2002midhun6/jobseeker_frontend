@@ -24,7 +24,7 @@ function ProfessionalTransactions() {
     const fetchTransactions = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:8000/api/professional/transactions/', {
+        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/professional/transactions/', {
           withCredentials: true,
         });
         const fetchedTransactions = response.data.transactions || [];

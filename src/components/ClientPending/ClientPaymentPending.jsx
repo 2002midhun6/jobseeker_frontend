@@ -19,7 +19,7 @@ function ClientPendingPayments() {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/client-pending-payments/', {
+        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/client-pending-payments/', {
           withCredentials: true,
         });
         console.log('Fetch Pending Payments Response:', response.data);
@@ -101,7 +101,7 @@ function ClientPendingPayments() {
           console.log('Verification Payload:', payload);
 
           const verifyResponse = await axios.post(
-            'http://localhost:8000/api/verify-payment/',
+            'https://jobseeker-69742084525.us-central1.run.app/api/verify-payment/',
             payload,
             { withCredentials: true }
           );

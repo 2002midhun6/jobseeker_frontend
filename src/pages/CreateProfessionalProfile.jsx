@@ -23,7 +23,7 @@ function CreateProfessionalProfile() {
 
   const fetchProfile = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/profile/', {
+      const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/profile/', {
         withCredentials: true,
       });
       const { user, ...profileData } = response.data; // Exclude user field
@@ -171,12 +171,12 @@ function CreateProfessionalProfile() {
     try {
       let response;
       if (profileExists) {
-        response = await axios.patch('http://localhost:8000/api/profile/', data, {
+        response = await axios.patch('https://jobseeker-69742084525.us-central1.run.app/api/profile/', data, {
           withCredentials: true,
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       } else {
-        response = await axios.post('http://localhost:8000/api/profile/', data, {
+        response = await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/profile/', data, {
           withCredentials: true,
           headers: { 'Content-Type': 'multipart/form-data' },
         });
@@ -218,7 +218,7 @@ function CreateProfessionalProfile() {
 
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/request-verification/',
+        'https://jobseeker-69742084525.us-central1.run.app/api/request-verification/',
         {},
         { withCredentials: true }
       );

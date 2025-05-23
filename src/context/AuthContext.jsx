@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
     
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/token/refresh/',
+        'https://jobseeker-69742084525.us-central1.run.app/api/token/refresh/',
         {}, // No body needed as the refresh token is in the HTTP-only cookie
         { withCredentials: true }
       );
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/check-auth/', {
+        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/check-auth/', {
           withCredentials: true,
         });
 
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
             dispatch({ type: 'LOGOUT' });
           } else {
             // If refresh worked, check auth again
-            const newResponse = await axios.get('http://localhost:8000/api/check-auth/', {
+            const newResponse = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/check-auth/', {
               withCredentials: true,
             });
             
@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await axios.post(
-        'http://localhost:8000/api/login/',
+        'https://jobseeker-69742084525.us-central1.run.app/api/login/',
         { email, password },
         { withCredentials: true }
       );
@@ -151,7 +151,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post('http://localhost:8000/api/logout/', {}, { withCredentials: true });
+      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/logout/', {}, { withCredentials: true });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

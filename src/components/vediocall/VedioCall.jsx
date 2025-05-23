@@ -38,7 +38,7 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
         }
 
         console.log('Getting video call WebSocket auth token...');
-        const response = await fetch('http://localhost:8000/api/ws-auth-token/', {
+        const response = await fetch('https://jobseeker-69742084525.us-central1.run.app/api/ws-auth-token/', {
           method: 'GET',
           credentials: 'include',
         });
@@ -54,7 +54,7 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
           throw new Error('No WebSocket auth token received');
         }
 
-        const wsUrl = `ws://localhost:8000/ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
+        const wsUrl = `wss://jobseeker-69742084525.us-central1.run.app/ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
         console.log('Connecting to video call WebSocket:', wsUrl);
 
         const ws = new WebSocket(wsUrl);
