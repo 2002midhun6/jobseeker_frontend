@@ -3,6 +3,20 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 
+// ADD THIS MISSING authReducer FUNCTION
+const authReducer = (state, action) => {
+  switch (action.type) {
+    case 'LOGIN':
+      return { ...state, user: action.payload.user, isAuthenticated: true };
+    case 'LOGOUT':
+      return { ...state, user: null, isAuthenticated: false };
+    case 'UPDATE_USER':
+      return { ...state, user: action.payload.user };
+    default:
+      return state;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
@@ -83,23 +97,23 @@ export const AuthProvider = ({ children }) => {
     };
   }, [state.isAuthenticated, refreshing]);
 
-  // Rest of your code remains the same...
-
-
   // Check authentication status on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        console.log('Checking authentication status...');
         const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/check-auth/', {
           withCredentials: true,
         });
 
         if (response.data.isAuthenticated) {
+          console.log('User is authenticated');
           dispatch({
             type: 'LOGIN',
             payload: { user: response.data.user },
           });
         } else {
+          console.log('User not authenticated, attempting token refresh...');
           // Try to refresh the token if not authenticated
           const refreshed = await refreshToken();
           
@@ -113,11 +127,13 @@ export const AuthProvider = ({ children }) => {
             });
             
             if (newResponse.data.isAuthenticated) {
+              console.log('Authentication successful after refresh');
               dispatch({
                 type: 'LOGIN',
                 payload: { user: newResponse.data.user },
               });
             } else {
+              console.log('Authentication failed after refresh');
               dispatch({ type: 'LOGOUT' });
             }
           }
@@ -135,12 +151,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('Attempting login...');
       const response = await axios.post(
         'https://jobseeker-69742084525.us-central1.run.app/api/login/',
         { email, password },
         { withCredentials: true }
       );
       
+      console.log('Login successful');
       dispatch({
         type: 'LOGIN',
         payload: { user: response.data.user }
@@ -148,6 +166,7 @@ export const AuthProvider = ({ children }) => {
       
       return { success: true, data: response.data };
     } catch (error) {
+      console.error('Login failed:', error.response?.data || error.message);
       return { 
         success: false, 
         error: error.response?.data?.error || 'Login failed'
@@ -157,7 +176,8 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post('http://localhost:8000/api/logout/', {}, { withCredentials: true });
+      // FIXED: Use the correct URL for logout
+      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/logout/', {}, { withCredentials: true });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
