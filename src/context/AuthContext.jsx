@@ -3,19 +3,6 @@ import axios from 'axios';
 
 export const AuthContext = createContext();
 
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case 'LOGIN':
-      return { ...state, user: action.payload.user, isAuthenticated: true };
-    case 'LOGOUT':
-      return { ...state, user: null, isAuthenticated: false };
-    case 'UPDATE_USER':
-      return { ...state, user: action.payload.user };
-    default:
-      return state;
-  }
-};
-
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
@@ -26,26 +13,36 @@ export const AuthProvider = ({ children }) => {
 
   // Function to refresh the access token
   const refreshToken = async () => {
-    if (refreshing) return;
+    if (refreshing) {
+      console.log('Already refreshing, skipping...');
+      return false;
+    }
+    
     setRefreshing(true);
     
     try {
+      console.log('Attempting to refresh token...');
       const response = await axios.post(
         'https://jobseeker-69742084525.us-central1.run.app/api/token/refresh/',
-        {}, // No body needed as the refresh token is in the HTTP-only cookie
-        { withCredentials: true }
+        {}, 
+        { 
+          withCredentials: true,
+          timeout: 10000 // Add timeout
+        }
       );
       
-      // If successful, the server will have set a new access_token cookie
-      // We can return true to indicate success
-      setRefreshing(false);
+      console.log('Token refresh successful');
       return true;
     } catch (error) {
-      console.error('Token refresh failed:', error);
-      // If refresh fails, log the user out
-      dispatch({ type: 'LOGOUT' });
-      setRefreshing(false);
+      console.error('Token refresh failed:', error.response?.status, error.response?.data);
+      
+      // Only logout if it's actually a 401, not network errors
+      if (error.response?.status === 401) {
+        dispatch({ type: 'LOGOUT' });
+      }
       return false;
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -56,29 +53,38 @@ export const AuthProvider = ({ children }) => {
       async (error) => {
         const originalRequest = error.config;
         
+        // Prevent infinite loops
+        if (originalRequest._retry || refreshing) {
+          return Promise.reject(error);
+        }
+        
         // If the error is 401 and we haven't tried to refresh the token yet
-        if (error.response?.status === 401 && !originalRequest._retry && state.isAuthenticated) {
+        if (error.response?.status === 401 && state.isAuthenticated) {
           originalRequest._retry = true;
           
-          // Try to refresh the token
+          console.log('401 error detected, attempting token refresh...');
           const refreshed = await refreshToken();
           
-          // If refresh was successful, retry the original request
           if (refreshed) {
+            console.log('Token refreshed, retrying original request');
             return axios(originalRequest);
+          } else {
+            console.log('Token refresh failed');
+            dispatch({ type: 'LOGOUT' });
           }
         }
         
-        // Otherwise, just pass on the error
         return Promise.reject(error);
       }
     );
     
-    // Clean up interceptor on unmount
     return () => {
       axios.interceptors.response.eject(interceptor);
     };
-  }, [state.isAuthenticated]);
+  }, [state.isAuthenticated, refreshing]);
+
+  // Rest of your code remains the same...
+
 
   // Check authentication status on mount
   useEffect(() => {
@@ -151,7 +157,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/logout/', {}, { withCredentials: true });
+      await axios.post('http://localhost:8000/api/logout/', {}, { withCredentials: true });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
