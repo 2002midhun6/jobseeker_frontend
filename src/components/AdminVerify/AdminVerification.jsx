@@ -138,7 +138,7 @@ function AdminProfessionalVerification() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/admin/verification-requests/', {
+        const response = await axios.get('https://api.midhung.in/api/admin/verification-requests/', {
           withCredentials: true,
         });
         setRequests(response.data);
@@ -189,7 +189,7 @@ function AdminProfessionalVerification() {
       if (reason) requestData.denial_reason = reason;
       
       const response = await axios.post(
-        `https://jobseeker-69742084525.us-central1.run.app/api/admin/verify-professional/${professionalId}/`,
+        `https://api.midhung.in/api/admin/verify-professional/${professionalId}/`,
         requestData,
         { withCredentials: true }
       );

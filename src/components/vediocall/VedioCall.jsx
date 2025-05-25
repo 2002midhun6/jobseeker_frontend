@@ -38,7 +38,7 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
         }
 
         console.log('Getting video call WebSocket auth token...');
-        const response = await fetch('https://jobseeker-69742084525.us-central1.run.app/api/ws-auth-token/', {
+        const response = await fetch('https://api.midhung.in/api/ws-auth-token/', {
           method: 'GET',
           credentials: 'include',
         });

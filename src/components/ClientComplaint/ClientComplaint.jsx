@@ -21,7 +21,7 @@ function ComplaintManagement() {
   const fetchComplaints = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/complaints/', {
+      const response = await axios.get('https://api.midhung.in/api/complaints/', {
         withCredentials: true,
       });
       setComplaints(response.data);
@@ -49,7 +49,7 @@ function ComplaintManagement() {
     try {
       setSubmitting(true);
       await axios.post(
-        'https://jobseeker-69742084525.us-central1.run.app/api/complaints/',
+        'https://api.midhung.in/api/complaints/',
         { description },
         { withCredentials: true }
       );

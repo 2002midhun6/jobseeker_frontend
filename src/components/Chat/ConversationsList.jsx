@@ -13,7 +13,7 @@ function ConversationsList({ userType = 'client' }) {
     const fetchConversations = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/conversations/', {
+        const response = await axios.get('https://api.midhung.in/api/conversations/', {
           withCredentials: true,
         });
         

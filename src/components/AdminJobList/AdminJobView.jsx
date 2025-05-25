@@ -25,7 +25,7 @@ function AdminJobs() {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/admin/jobs/', {
+        const response = await axios.get('https://api.midhung.in/api/admin/jobs/', {
           withCredentials: true,
         });
         console.log(response.data);

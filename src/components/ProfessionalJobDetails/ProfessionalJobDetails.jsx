@@ -27,7 +27,7 @@ function ProfessionalJobApplications() {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/professional-job-applications/', {
+        const response = await axios.get('https://api.midhung.in/api/professional-job-applications/', {
           withCredentials: true,
         });
         console.log('Fetch Professional Applications Response:', response.data);
@@ -95,7 +95,7 @@ function ProfessionalJobApplications() {
 
     try {
       const response = await axios.post(
-        'https://jobseeker-69742084525.us-central1.run.app/api/professional-job-applications/',
+        'https://api.midhung.in/api/professional-job-applications/',
         { application_id: applicationId, action },
         { withCredentials: true }
       );

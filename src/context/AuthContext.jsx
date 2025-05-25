@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Attempting to refresh token...');
       const response = await axios.post(
-        'https://jobseeker-69742084525.us-central1.run.app/api/token/refresh/',
+        'https://api.midhung.in/api/token/refresh/',
         {}, 
         { 
           withCredentials: true,
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       try {
         console.log('Checking authentication status...');
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/check-auth/', {
+        const response = await axios.get('https://api.midhung.in/api/check-auth/', {
           withCredentials: true,
         });
 
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }) => {
             dispatch({ type: 'LOGOUT' });
           } else {
             // If refresh worked, check auth again
-            const newResponse = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/check-auth/', {
+            const newResponse = await axios.get('https://api.midhung.in//api/check-auth/', {
               withCredentials: true,
             });
             
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Attempting login...');
       const response = await axios.post(
-        'https://jobseeker-69742084525.us-central1.run.app/api/login/',
+        'https://api.midhung.in/api/login/',
         { email, password },
         { withCredentials: true }
       );
@@ -177,7 +177,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // FIXED: Use the correct URL for logout
-      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/logout/', {}, { withCredentials: true });
+      await axios.post('https://api.midhung.in/api/logout/', {}, { withCredentials: true });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

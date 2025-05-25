@@ -19,7 +19,7 @@ export const NotificationProvider = ({ children }) => {
       // Get WebSocket token first
       const getWebSocketToken = async () => {
         try {
-          const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/websocket-token/', {
+          const response = await axios.get('https://api.midhung.in/api/websocket-token/', {
             withCredentials: true
           });
           
@@ -90,7 +90,7 @@ export const NotificationProvider = ({ children }) => {
   // Fetch notifications from API
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/notifications/', {
+      const response = await axios.get('https://api.midhung.in/api/notifications/', {
         withCredentials: true
       });
       
@@ -227,7 +227,7 @@ export const NotificationProvider = ({ children }) => {
   // Mark notifications as read
   const markAsRead = async (notificationId) => {
     try {
-      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/notifications/mark-read/', {
+      await axios.post('https://api.midhung.in/api/notifications/mark-read/', {
         notification_id: notificationId
       }, {
         withCredentials: true
@@ -250,7 +250,7 @@ export const NotificationProvider = ({ children }) => {
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/notifications/mark-all-read/', {}, {
+      await axios.post('https://api.midhung.in/api/notifications/mark-all-read/', {}, {
         withCredentials: true
       });
       

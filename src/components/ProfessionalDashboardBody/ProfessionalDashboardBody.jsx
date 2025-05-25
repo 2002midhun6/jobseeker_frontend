@@ -21,7 +21,7 @@ function ProfessionalDashBoardContent() {
     const checkProfile = async () => {
       
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/profile/', {
+        const response = await axios.get('https://api.midhung.in/api/profile/', {
           withCredentials: true,
          
         });
@@ -55,7 +55,7 @@ function ProfessionalDashBoardContent() {
     const fetchProjectCountsAndReviews = async () => {
       
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/professional-job-applications/', {
+        const response = await axios.get('https://api.midhung.in/api/professional-job-applications/', {
           withCredentials: true,
          
         });

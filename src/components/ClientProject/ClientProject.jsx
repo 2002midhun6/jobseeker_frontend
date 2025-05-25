@@ -30,7 +30,7 @@ function ClientProjects() {
     const fetchProjects = async () => {
      
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/client-project/', {
+        const response = await axios.get('https://api.midhung.in/api/client-project/', {
           withCredentials: true,
           
         });
@@ -135,7 +135,7 @@ function ClientProjects() {
 
     try {
       const response = await axios.post(
-        'https://jobseeker-69742084525.us-central1.run.app/api/submit-review/',
+        'https://api.midhung.in/api/submit-review/',
         { job_id: jobId, rating, review },
         { withCredentials: true,  }
       );

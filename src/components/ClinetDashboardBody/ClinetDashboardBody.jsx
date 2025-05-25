@@ -18,7 +18,7 @@ function ClientDashBoardContent() {
   useEffect(() => {
     const fetchProjectCounts = async () => {
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/client-project/', {
+        const response = await axios.get('https://api.midhung.in/api/client-project/', {
           withCredentials: true,
         });
         setProjectCounts({

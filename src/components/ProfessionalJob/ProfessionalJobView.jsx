@@ -25,7 +25,7 @@ function ProfessionalJobs() {
       if (!isAuthenticated || !user || user.role !== 'professional') return;
       
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/profile/', {
+        const response = await axios.get('https://api.midhung.in/api/profile/', {
           withCredentials: true,
         });
         setProfileData(response.data);
@@ -49,7 +49,7 @@ function ProfessionalJobs() {
   useEffect(() => {
     const fetchOpenJobs = async () => {
       try {
-        const response = await axios.get('https://jobseeker-69742084525.us-central1.run.app/api/open-jobs/', {
+        const response = await axios.get('https://api.midhung.in/api/open-jobs/', {
           withCredentials: true,
         });
         setOpenJobs(response.data);
@@ -111,7 +111,7 @@ function ProfessionalJobs() {
 
     try {
       const response = await axios.post(
-        'https://jobseeker-69742084525.us-central1.run.app/api/apply-to-job/',
+        'https://api.midhung.in/api/apply-to-job/',
         { job_id: jobId },
         {
           withCredentials: true,
