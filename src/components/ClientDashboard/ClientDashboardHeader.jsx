@@ -16,7 +16,7 @@ function ClientHeader() {
 
   const handleLogout = async () => {
     try {
-      await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/logout/', {}, { withCredentials: true });
+      await axios.post('https://api.midhung.in/api/logout/', {}, { withCredentials: true });
       dispatch({ type: 'LOGOUT' });
       navigate('/login');
     } catch (err) {
