@@ -106,7 +106,7 @@ function JobPage() {
     
     try {
       setLoading(true);
-      const response = await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/jobs/', formData, {
+      const response = await axios.post('https://api.midhung.in/api/jobs/', formData, {
         withCredentials: true, // Send cookies with request
       });
       setFormData({

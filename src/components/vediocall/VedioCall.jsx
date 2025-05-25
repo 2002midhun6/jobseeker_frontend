@@ -54,7 +54,7 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
           throw new Error('No WebSocket auth token received');
         }
 
-        const wsUrl = `wss://jobseeker-69742084525.us-central1.run.app/ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
+        const wsUrl = `wss://api.midhung.in/ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
         console.log('Connecting to video call WebSocket:', wsUrl);
 
         const ws = new WebSocket(wsUrl);

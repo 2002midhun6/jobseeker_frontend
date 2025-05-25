@@ -51,7 +51,7 @@ const ProfessionalNotifications = () => {
       const token = await getWebSocketToken();
       if (!token) return;
 
-      const ws = new WebSocket(`wss://jobseeker-69742084525.us-central1.run.app/ws/notifications/?token=${token}`);
+      const ws = new WebSocket(`wss://api.midhung.in/ws/notifications/?token=${token}`);
       
       ws.onopen = () => {
         console.log('Notification WebSocket connected');

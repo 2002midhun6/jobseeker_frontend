@@ -144,7 +144,7 @@ const { user} = useContext(AuthContext);
             throw new Error('No authentication token received');
           }
 
-          const wsUrl = `wss://jobseeker-69742084525.us-central1.run.app/ws/chat/${jobId}/?token=${encodeURIComponent(token)}`;
+          const wsUrl = `wss://api.midhung.in/ws/chat/${jobId}/?token=${encodeURIComponent(token)}`;
           console.log('Connecting to WebSocket:', wsUrl);
 
           ws = new WebSocket(wsUrl);

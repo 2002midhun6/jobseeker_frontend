@@ -26,7 +26,7 @@ export const NotificationProvider = ({ children }) => {
           const wsToken = response.data.access_token;
           
           // Create WebSocket connection with authentication token
-          const ws = new WebSocket(`wss://jobseeker-69742084525.us-central1.run.app/ws/notifications/?token=${wsToken}`);
+          const ws = new WebSocket(`wss://api.midhung.in/ws/notifications/?token=${wsToken}`);
           
           ws.onopen = () => {
             console.log('Notification WebSocket connected');
