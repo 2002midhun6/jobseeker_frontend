@@ -30,7 +30,7 @@ function Login() {
     try {
       setError('');
       setMessage('');
-      const response = await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/login/', formData, {
+      const response = await axios.post('https://api.midhung.in/api/login/', formData, {
         withCredentials: true,
       });
 
@@ -56,7 +56,7 @@ function Login() {
     try {
       setError('');
       setMessage('');
-      const response = await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/forgot-password/', {
+      const response = await axios.post('https://api.midhung.in/api/forgot-password/', {
         email: resetData.email,
       });
       setMessage(response.data.message);
@@ -71,7 +71,7 @@ function Login() {
     try {
       setError('');
       setMessage('');
-      const response = await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/reset-password/', resetData);
+      const response = await axios.post('https://api.midhung.in/api/reset-password/', resetData);
       setMessage(response.data.message);
       setTimeout(() => {
         setForgotPassword(false);
@@ -90,7 +90,7 @@ function Login() {
       setError('');
       setMessage('');
       setIsResendLoading(true);
-      const response = await axios.post('https://jobseeker-69742084525.us-central1.run.app/api/resend-otp/', {
+      const response = await axios.post('https://api.midhung.in/api/resend-otp/', {
         email: resetData.email,
       });
       setMessage(response.data.message);

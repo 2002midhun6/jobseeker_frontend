@@ -52,7 +52,7 @@ function Register() {
     }
 
     try {
-      await axios.post("https://jobseeker-69742084525.us-central1.run.app/api/register/", formData, {
+      await axios.post("https://api.midhung.in/api/register/", formData, {
         withCredentials: true,
       });
       navigate("/verify-otp");
