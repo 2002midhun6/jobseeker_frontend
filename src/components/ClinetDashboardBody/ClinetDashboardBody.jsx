@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './ClientDashboardBody.css';
-import EnhancedNotifications from '../Notification/EnhancedNotifications'; // Updated import
+import EnhancedNotifications from './EnhancedNotifications' // Updated import
 
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
