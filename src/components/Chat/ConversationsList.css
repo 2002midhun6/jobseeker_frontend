@@ -48,7 +48,7 @@ header-content {
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
-  padding: 10px 16px; /* Smaller padding for alignment */
+  
   font-size: 14px;
   font-weight: bold;
   cursor: pointer;
@@ -56,7 +56,9 @@ header-content {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 0; /* Remove margin to prevent vertical offset */
+  margin: 0;
+  margin-left: 0;
+  padding-left: 0; /* Remove margin to prevent vertical offset */
 }
 
 .back-button:hover {
