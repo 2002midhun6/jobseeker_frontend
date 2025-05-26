@@ -366,7 +366,7 @@ function ConversationsList({ userType = 'client' }) {
             Your Conversations
           </h2>
           <p className="header-subtitle">
-            Connect and communicate with your {userType === 'personal' ? 'clients' : 'professionals'}
+            Connect and communicate with your {userType === 'client' ? 'professionals' : 'clients'}
           </p>
         </div>
       </div>
