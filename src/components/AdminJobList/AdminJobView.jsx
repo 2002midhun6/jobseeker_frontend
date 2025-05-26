@@ -5,6 +5,48 @@ import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './AdminJobView.css';
 
+// Spinner Component (copied from ProfessionalDashBoardContent.jsx)
+const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
+  const spinnerStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+    },
+    spinner: {
+      width: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      height: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      border: `${size === 'small' ? '2px' : '3px'} solid #f3f3f3`,
+      borderTop: `${size === 'small' ? '2px' : '3px'} solid #007bff`,
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '10px',
+    },
+    text: {
+      color: '#666',
+      fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
+      fontWeight: '500',
+    }
+  };
+
+  return (
+    <div style={spinnerStyles.container}>
+      <div style={spinnerStyles.spinner}></div>
+      <span style={spinnerStyles.text}>{text}</span>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
 function AdminJobs() {
   const { user, isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -133,7 +175,7 @@ function AdminJobs() {
         >
           Next
         </button>
-      </div>
+        </div>
     );
   };
 
@@ -180,7 +222,9 @@ function AdminJobs() {
         </div>
         {error && <div className="error-message">{error}</div>}
         {loading ? (
-          <p className="loading-message">Loading jobs...</p>
+          <div style={{ margin: '20px 0', textAlign: 'center' }}>
+            <Spinner size="medium" text="Loading jobs..." />
+          </div>
         ) : (
           <div className="tabs-container">
             {(activeTab === 'all' || activeTab === 'pending') && (

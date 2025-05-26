@@ -3,6 +3,48 @@ import axios from 'axios';
 import AdminHeaderComp from '../AdminHeaderComp/AdminHeaderComp';
 import './AdminDashboard.css';
 
+// Spinner Component (copied from ProfessionalDashBoardContent.jsx)
+const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
+  const spinnerStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+    },
+    spinner: {
+      width: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      height: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      border: `${size === 'small' ? '2px' : '3px'} solid #f3f3f3`,
+      borderTop: `${size === 'small' ? '2px' : '3px'} solid #007bff`,
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '10px',
+    },
+    text: {
+      color: '#666',
+      fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
+      fontWeight: '500',
+    }
+  };
+
+  return (
+    <div style={spinnerStyles.container}>
+      <div style={spinnerStyles.spinner}></div>
+      <span style={spinnerStyles.text}>{text}</span>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
   const [metrics, setMetrics] = useState({
     professionals: 0,
@@ -64,7 +106,7 @@ const AdminDashboard = () => {
   if (isUnauthorized) {
     return (
       <div className="admin-dashboard">
-  
+        <AdminHeaderComp />
         <main>
           <h1>Admin Dashboard</h1>
           <div className="error-message">You do not have permission to access the admin dashboard.</div>
@@ -75,49 +117,55 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      
+      <AdminHeaderComp />
       <main>
         <h1>Admin Dashboard</h1>
-        {loading && <div className="loading-message">Loading...</div>}
-        {error && <div className="error-message">{error}</div>}
-        <div className="metrics-grid">
-          <div className="metric-card">
-            <h2>Professionals</h2>
-            <p className="metric-value">{metrics.professionals}</p>
+        {loading ? (
+          <div style={{ margin: '20px 0', textAlign: 'center' }}>
+            <Spinner size="medium" text="Loading dashboard metrics..." />
           </div>
-          <div className="metric-card">
-            <h2>Clients</h2>
-            <p className="metric-value">{metrics.clients}</p>
+        ) : error ? (
+          <div className="error-message">{error}</div>
+        ) : (
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <h2>Professionals</h2>
+              <p className="metric-value">{metrics.professionals}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Clients</h2>
+              <p className="metric-value">{metrics.clients}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Verified Professionals</h2>
+              <p className="metric-value">{metrics.verifiedProfessionals}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Pending Complaints</h2>
+              <p className="metric-value">{metrics.pendingComplaints}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Total Jobs</h2>
+              <p style={{color:'black'}} className="metric-value">{metrics.totalJobs}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Completed Works</h2>
+              <p className="metric-value">{metrics.completedJobs}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Active Applications</h2>
+              <p className="metric-value">{metrics.activeApplications}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Active Conversations</h2>
+              <p className="metric-value">{metrics.activeConversations}</p>
+            </div>
+            <div className="metric-card">
+              <h2>Total Payments (₹)</h2>
+              <p className="metric-value">{metrics.totalPayments.toLocaleString()}</p>
+            </div>
           </div>
-          <div className="metric-card">
-            <h2>Verified Professionals</h2>
-            <p className="metric-value">{metrics.verifiedProfessionals}</p>
-          </div>
-          <div className="metric-card">
-            <h2>Pending Complaints</h2>
-            <p className="metric-value">{metrics.pendingComplaints}</p>
-          </div>
-          <div className="metric-card">
-            <h2>Total Jobs</h2>
-            <p style={{color:'black'}} className="metric-value">{metrics.totalJobs}</p>
-          </div>
-          <div className="metric-card">
-            <h2>Completed Works</h2>
-            <p className="metric-value">{metrics.completedJobs}</p>
-          </div>
-          <div className="metric-card">
-            <h2>Active Applications</h2>
-            <p className="metric-value">{metrics.activeApplications}</p>
-          </div>
-          <div className="metric-card">
-            <h2>Active Conversations</h2>
-            <p className="metric-value">{metrics.activeConversations}</p>
-          </div>
-          <div className="metric-card">
-            <h2>Total Payments (₹)</h2>
-            <p className="metric-value">{metrics.totalPayments.toLocaleString()}</p>
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );

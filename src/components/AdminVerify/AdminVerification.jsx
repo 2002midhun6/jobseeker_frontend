@@ -5,6 +5,48 @@ import { AuthContext } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
 import './AdminVerification.css';
 
+// Spinner Component (copied from ProfessionalDashBoardContent.jsx)
+const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
+  const spinnerStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+    },
+    spinner: {
+      width: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      height: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      border: `${size === 'small' ? '2px' : '3px'} solid #f3f3f3`,
+      borderTop: `${size === 'small' ? '2px' : '3px'} solid #007bff`,
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '10px',
+    },
+    text: {
+      color: '#666',
+      fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
+      fontWeight: '500',
+    }
+  };
+
+  return (
+    <div style={spinnerStyles.container}>
+      <div style={spinnerStyles.spinner}></div>
+      <span style={spinnerStyles.text}>{text}</span>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
 // Separate modal component to prevent re-renders of the parent
 const DenialReasonModal = React.memo(({ 
   showModal, 
@@ -129,7 +171,6 @@ function AdminProfessionalVerification() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedProfessionalId, setSelectedProfessionalId] = useState(null);
   const [denialReason, setDenialReason] = useState('');
   const [showDenialModal, setShowDenialModal] = useState(false);
@@ -239,9 +280,8 @@ function AdminProfessionalVerification() {
 
   if (loading) {
     return (
-      <div className="spinner-container">
-        <div className="spinner"></div>
-        <p>Loading verification requests...</p>
+      <div style={{ margin: '20px 0', textAlign: 'center' }}>
+        <Spinner size="medium" text="Loading verification requests..." />
       </div>
     );
   }
@@ -251,8 +291,19 @@ function AdminProfessionalVerification() {
   return (
     <>
       {actionLoading && (
-        <div className="spinner-overlay">
-          <div className="spinner"></div>
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+        }}>
+          <Spinner size="medium" text="Processing action..." />
         </div>
       )}
       
@@ -266,6 +317,7 @@ function AdminProfessionalVerification() {
       
       <div className="admin-verification-container">
         <h2 style={{ color: 'white' }}>Professional Verification Requests</h2>
+        {error && <div className="error-message">{error}</div>}
         {requests.length === 0 ? (
           <p>No pending verification requests.</p>
         ) : (

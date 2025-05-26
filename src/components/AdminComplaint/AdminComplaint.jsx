@@ -4,6 +4,48 @@ import { AuthContext } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
 import './AdminComplaint.css';
 
+// Spinner Component (copied from ProfessionalDashBoardContent.jsx)
+const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
+  const spinnerStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+    },
+    spinner: {
+      width: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      height: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      border: `${size === 'small' ? '2px' : '3px'} solid #f3f3f3`,
+      borderTop: `${size === 'small' ? '2px' : '3px'} solid #007bff`,
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '10px',
+    },
+    text: {
+      color: '#666',
+      fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
+      fontWeight: '500',
+    }
+  };
+
+  return (
+    <div style={spinnerStyles.container}>
+      <div style={spinnerStyles.spinner}></div>
+      <span style={spinnerStyles.text}>{text}</span>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
 function AdminComplaintManagement() {
   const { user, isAuthenticated } = useContext(AuthContext) || { user: null, isAuthenticated: false };
   const [complaints, setComplaints] = useState([]);
@@ -11,32 +53,32 @@ function AdminComplaintManagement() {
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
-  
+
   useEffect(() => {
     if (isAuthenticated && (user?.is_staff || user?.is_superuser)) {
       fetchComplaints();
     }
   }, [isAuthenticated, user, statusFilter]);
-  
+
   const fetchComplaints = async () => {
     try {
       setLoading(true);
       let url = 'https://api.midhung.in/api/admin/complaints/';
       // let url = 'http://localhost:8000/api/admin/complaints/';
-      
+
       // Add query parameters
       const params = new URLSearchParams();
       if (statusFilter) params.append('status', statusFilter);
       if (searchQuery) params.append('search', searchQuery);
-      
+
       if (params.toString()) {
         url += `?${params.toString()}`;
       }
-      
+
       const response = await axios.get(url, {
         withCredentials: true,
       });
-      
+
       setComplaints(response.data);
       setLoading(false);
     } catch (err) {
@@ -45,12 +87,12 @@ function AdminComplaintManagement() {
       console.error('Error fetching complaints:', err);
     }
   };
-  
+
   const handleSearch = (e) => {
     e.preventDefault();
     fetchComplaints();
   };
-  
+
   const handleStatusChange = async (complaintId, newStatus) => {
     try {
       await axios.patch(
@@ -58,14 +100,14 @@ function AdminComplaintManagement() {
         { status: newStatus },
         { withCredentials: true }
       );
-      
+
       // Update local state
-      setComplaints(complaints.map(complaint => 
-        complaint.id === complaintId 
-          ? { ...complaint, status: newStatus, status_display: getStatusDisplayName(newStatus) } 
+      setComplaints(complaints.map(complaint =>
+        complaint.id === complaintId
+          ? { ...complaint, status: newStatus, status_display: getStatusDisplayName(newStatus) }
           : complaint
       ));
-      
+
       Swal.fire({
         icon: 'success',
         title: 'Status Updated',
@@ -78,7 +120,7 @@ function AdminComplaintManagement() {
       });
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to update status';
-      
+
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -88,7 +130,7 @@ function AdminComplaintManagement() {
       console.error('Error updating complaint status:', err);
     }
   };
-  
+
   const getStatusDisplayName = (status) => {
     const statusMap = {
       'PENDING': 'Pending',
@@ -98,7 +140,7 @@ function AdminComplaintManagement() {
     };
     return statusMap[status] || status;
   };
-  
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'PENDING':
@@ -113,11 +155,11 @@ function AdminComplaintManagement() {
         return 'badge-primary';
     }
   };
-  
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
-  
+
   if (!isAuthenticated || !user || (!user.is_staff && !user.is_superuser)) {
     return (
       <div className="admin-complaint-unauthorized">
@@ -126,11 +168,11 @@ function AdminComplaintManagement() {
       </div>
     );
   }
-  
+
   return (
     <div className="admin-complaint-management">
       <h1>Complaint Administration</h1>
-      
+
       <div className="filters-container">
         <div className="status-filter">
           <label htmlFor="status">Filter by Status:</label>
@@ -146,10 +188,9 @@ function AdminComplaintManagement() {
             <option value="CLOSED">Closed</option>
           </select>
         </div>
-        
+
         <form className="search-form" onSubmit={handleSearch}>
           <input
-          
             type="text"
             placeholder="Search by description or email"
             value={searchQuery}
@@ -158,9 +199,11 @@ function AdminComplaintManagement() {
           <button type="submit">Search</button>
         </form>
       </div>
-      
+
       {loading ? (
-        <p className="loading">Loading complaints...</p>
+        <div style={{ margin: '20px 0', textAlign: 'center' }}>
+          <Spinner size="medium" text="Loading complaints..." />
+        </div>
       ) : error ? (
         <p className="error">{error}</p>
       ) : complaints.length === 0 ? (
@@ -185,7 +228,7 @@ function AdminComplaintManagement() {
                   <td>#{complaint.id}</td>
                   <td>{complaint.user_email}</td>
                   <td>{complaint.user_role}</td>
-                  <td >{complaint.description}</td>
+                  <td>{complaint.description}</td>
                   <td>
                     <span className={`status-badge ${getStatusBadgeClass(complaint.status)}`}>
                       {complaint.status_display || getStatusDisplayName(complaint.status)}
