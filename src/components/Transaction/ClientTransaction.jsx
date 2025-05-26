@@ -131,7 +131,7 @@ const SearchAndFilter = ({ searchQuery, onSearchChange, filterType, onFilterChan
     <div className="search-filter-container">
       <div className="search-section">
         <div className="search-input-wrapper">
-          <span className="search-icon">🔍</span>
+          
           <input
             type="text"
             placeholder="Search by job title, professional name, or order ID..."
@@ -157,9 +157,9 @@ const SearchAndFilter = ({ searchQuery, onSearchChange, filterType, onFilterChan
           onChange={onFilterChange}
           className="filter-select"
         >
-          <option value="all">All Types</option>
-          <option value="initial">Initial Payments</option>
-          <option value="remaining">Final Payments</option>
+          <option style={{color:black}}value="all">All Types</option>
+          <option style={{color:black}} value="initial">Initial Payments</option>
+          <option style={{color:black}} value="remaining">Final Payments</option>
         </select>
       </div>
 
@@ -417,6 +417,7 @@ function ClientTransactions() {
             onFilterChange={handleFilterChange}
             totalTransactions={transactions.length}
             filteredCount={filteredTransactions.length}
+            style={{color:black}}
           />
 
           {/* View Mode Toggle */}
