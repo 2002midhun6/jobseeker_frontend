@@ -417,7 +417,7 @@ function ClientTransactions() {
             onFilterChange={handleFilterChange}
             totalTransactions={transactions.length}
             filteredCount={filteredTransactions.length}
-            style={{color:black}}
+            
           />
 
           {/* View Mode Toggle */}
