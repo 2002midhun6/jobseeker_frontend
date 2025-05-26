@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './ProfessionalDashboardBody.css';
 import ProfessionalNotifications from '../Notification/ProfessionalNotification';
-import ProfessionalHeader from '../ProfessionalDashboard/ProfessionalDashboardHeader';
+
 function ProfessionalDashBoardContent() {
   const { user, isAuthenticated} = useContext(AuthContext); 
   const navigate = useNavigate();
@@ -116,7 +116,7 @@ function ProfessionalDashBoardContent() {
     
    
     <div className="professional-dashboard">
-       <ProfessionalHeader />
+       
       <h1>Professional Dashboard</h1>
       <ProfessionalNotifications/>
       {hasProfile ? (
