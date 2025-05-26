@@ -746,6 +746,7 @@
   border: none;
   text-align: center;
   white-space: nowrap;
+  width: fit-content;
 }
 
 /* Primary Button (View Applications) */
