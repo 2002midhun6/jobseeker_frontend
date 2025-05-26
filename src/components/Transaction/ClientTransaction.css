@@ -187,7 +187,7 @@
 
 .filter-select:focus {
   border-color: #3b82f6;
-  background: white;
+  background: rgb(121, 45, 213);
 }
 
 .stats-section {
