@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './EnhancedNotifications.css';
+import './EnhanceNotifications.css';
 
 // Enhanced Spinner Component
 const Spinner = ({ size = 'small', color = '#3b82f6' }) => {
