@@ -156,6 +156,7 @@ const SearchAndFilter = ({ searchQuery, onSearchChange, filterType, onFilterChan
           value={filterType} 
           onChange={onFilterChange}
           className="filter-select"
+          style={{ color: 'black' }}
         >
           <option style={{ color: 'black' }} value="all">All Types</option>
           <option style={{ color: 'black' }} value="initial">Initial Payments</option>
