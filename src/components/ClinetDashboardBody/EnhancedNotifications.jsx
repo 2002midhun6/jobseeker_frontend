@@ -161,16 +161,18 @@ const NotificationItem = ({ notification, userType, onMarkAsRead, onDelete, onRe
                   ✓
                 </button>
               )}
-              <button
-                className="action-btn delete"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(notification.id);
-                }}
-                title="Delete notification"
-              >
-                ✕
-              </button>
+              {onDelete && (
+                <button
+                  className="action-btn delete"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(notification.id);
+                  }}
+                  title="Delete notification"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -221,6 +223,7 @@ const EnhancedNotifications = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [socket, setSocket] = useState(null);
+  const [deleteSupported, setDeleteSupported] = useState(false);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
@@ -237,25 +240,84 @@ const EnhancedNotifications = () => {
     }
   };
 
-  // Fetch notifications
+  // Check API capabilities
+  const checkApiCapabilities = async () => {
+    try {
+      // Try the enhanced endpoint first
+      const response = await axios.get(
+        'https://api.midhung.in/api/notifications/?page=1',
+        { withCredentials: true }
+      );
+      
+      // Check if response has the new structure
+      if (response.data.notifications !== undefined) {
+        setDeleteSupported(true);
+        return 'enhanced';
+      }
+    } catch (error) {
+      console.log('Enhanced API not available, falling back to original');
+    }
+    
+    return 'original';
+  };
+
+  // Fetch notifications with fallback support
   const fetchNotifications = async (pageNum = 1, reset = false) => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `https://api.midhung.in/api/notifications/?page=${pageNum}&filter=${filter}`,
-        { withCredentials: true }
-      );
-
-      const newNotifications = response.data.notifications || [];
       
-      if (reset || pageNum === 1) {
-        setNotifications(newNotifications);
-      } else {
-        setNotifications(prev => [...prev, ...newNotifications]);
-      }
+      const apiType = await checkApiCapabilities();
+      let response;
+      
+      if (apiType === 'enhanced') {
+        // Try enhanced API first
+        response = await axios.get(
+          `https://api.midhung.in/api/notifications/?page=${pageNum}&filter=${filter}`,
+          { withCredentials: true }
+        );
+        
+        const newNotifications = response.data.notifications || [];
+        
+        if (reset || pageNum === 1) {
+          setNotifications(newNotifications);
+        } else {
+          setNotifications(prev => [...prev, ...newNotifications]);
+        }
 
-      setUnreadCount(response.data.unread_count || 0);
-      setHasMore(newNotifications.length >= 10); // Assuming 10 per page
+        setUnreadCount(response.data.unread_count || 0);
+        setHasMore(newNotifications.length >= 10);
+      } else {
+        // Fall back to original API
+        response = await axios.get('https://api.midhung.in/api/notifications/', {
+          withCredentials: true
+        });
+        
+        const allNotifications = response.data || [];
+        
+        // Apply client-side filtering for original API
+        let filteredNotifications = allNotifications;
+        if (filter === 'unread') {
+          filteredNotifications = allNotifications.filter(n => !n.is_read);
+        } else if (filter === 'read') {
+          filteredNotifications = allNotifications.filter(n => n.is_read);
+        }
+        
+        // Apply client-side pagination
+        const startIndex = (pageNum - 1) * 10;
+        const endIndex = startIndex + 10;
+        const paginatedNotifications = filteredNotifications.slice(startIndex, endIndex);
+        
+        if (reset || pageNum === 1) {
+          setNotifications(filteredNotifications.slice(0, endIndex));
+        } else {
+          setNotifications(prev => [...prev, ...paginatedNotifications]);
+        }
+
+        const unread = allNotifications.filter(notification => !notification.is_read).length;
+        setUnreadCount(unread);
+        setHasMore(endIndex < filteredNotifications.length);
+      }
+      
       setPage(pageNum);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -279,13 +341,13 @@ const EnhancedNotifications = () => {
       const data = JSON.parse(event.data);
       console.log('Notification received:', data);
       
-      if (data.type) {
-        // Create notification object
+      if (data.type || data.notification_type) {
+        // Create notification object compatible with both formats
         const notification = {
-          id: data.notification_id,
-          notification_type: data.type,
-          title: data.title || `New ${data.type.replace('_', ' ')}`,
-          message: data.message || `You have a new ${data.type.replace('_', ' ')} notification`,
+          id: data.notification_id || data.id,
+          notification_type: data.type || data.notification_type,
+          title: data.title || `New ${(data.type || data.notification_type || '').replace('_', ' ')}`,
+          message: data.message || `You have a new ${(data.type || data.notification_type || '').replace('_', ' ')} notification`,
           data: data,
           is_read: false,
           created_at: data.timestamp || new Date().toISOString()
@@ -302,8 +364,7 @@ const EnhancedNotifications = () => {
           });
           
           browserNotification.onclick = () => {
-            const path = getRedirectPath(notification, user?.role);
-            navigate(path);
+            navigate('/dashboard');
             window.focus();
           };
         }
@@ -331,14 +392,24 @@ const EnhancedNotifications = () => {
     audio.play().catch(err => console.log('Failed to play notification sound:', err));
   };
 
-  // Mark notification as read
+  // Mark notification as read with fallback
   const markAsRead = async (notificationId) => {
     try {
-      await axios.patch(
-        `https://api.midhung.in/api/notifications/${notificationId}/read/`,
-        {},
-        { withCredentials: true }
-      );
+      // Try enhanced API first
+      try {
+        await axios.patch(
+          `https://api.midhung.in/api/notifications/${notificationId}/read/`,
+          {},
+          { withCredentials: true }
+        );
+      } catch (error) {
+        // Fall back to original API
+        await axios.post('https://api.midhung.in/api/notifications/mark-read/', {
+          notification_id: notificationId
+        }, {
+          withCredentials: true
+        });
+      }
 
       setNotifications(prev =>
         prev.map(notification =>
@@ -354,14 +425,24 @@ const EnhancedNotifications = () => {
     }
   };
 
-  // Mark all as read
+  // Mark all as read with fallback
   const markAllAsRead = async () => {
     try {
-      await axios.patch(
-        'https://api.midhung.in/api/notifications/mark-all-read/',
-        {},
-        { withCredentials: true }
-      );
+      // Try enhanced API first
+      try {
+        await axios.patch(
+          'https://api.midhung.in/api/notifications/mark-all-read/',
+          {},
+          { withCredentials: true }
+        );
+      } catch (error) {
+        // Fall back to original API
+        await axios.post(
+          'https://api.midhung.in/api/notifications/mark-all-read/',
+          {},
+          { withCredentials: true }
+        );
+      }
 
       setNotifications(prev =>
         prev.map(notification => ({ ...notification, is_read: true }))
@@ -372,8 +453,10 @@ const EnhancedNotifications = () => {
     }
   };
 
-  // Delete notification
+  // Delete notification (only if supported)
   const deleteNotification = async (notificationId) => {
+    if (!deleteSupported) return;
+    
     try {
       await axios.delete(
         `https://api.midhung.in/api/notifications/${notificationId}/`,
@@ -444,6 +527,7 @@ const EnhancedNotifications = () => {
 
     fetchNotifications(1, true);
     initWebSocket();
+    
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
@@ -575,7 +659,7 @@ const EnhancedNotifications = () => {
                     notification={notification}
                     userType={user?.role}
                     onMarkAsRead={markAsRead}
-                    onDelete={deleteNotification}
+                    onDelete={deleteSupported ? deleteNotification : null}
                     onRedirect={handleRedirect}
                   />
                 ))}

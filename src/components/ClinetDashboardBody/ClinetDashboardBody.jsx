@@ -531,7 +531,7 @@ function ClientDashBoardContent() {
                 alignItems: 'center',
                 gap: '12px',
               }}>
-                <span style={{ fontSize: '32px' }}>🚀</span>
+                <span style={{ fontSize: '32px' ,color:'white' }}>🚀</span>
                 Active Projects ({projectData.active.length})
               </h2>
               {projectData.active.map((project, index) => (
@@ -552,7 +552,7 @@ function ClientDashBoardContent() {
                 alignItems: 'center',
                 gap: '12px',
               }}>
-                <span style={{ fontSize: '32px' }}>✅</span>
+                <span style={{ fontSize: '32px' ,color:'white'}}>✅</span>
                 Completed Projects ({projectData.completed.length})
               </h2>
               {projectData.completed.map((project, index) => (
