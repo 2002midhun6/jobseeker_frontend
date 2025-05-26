@@ -4,31 +4,40 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './ClientDashboardBody.css';
-import Notifications from '../Notification/Notification';
+import EnhancedNotifications from '../Notification/EnhancedNotifications'; // Updated import
 
-// Spinner Component
-const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
+// Enhanced Spinner Component
+const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
   const spinnerStyles = {
     container: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '20px',
+      padding: fullPage ? '60px 20px' : '20px',
+      backgroundColor: fullPage ? 'rgba(255, 255, 255, 0.95)' : 'transparent',
+      borderRadius: fullPage ? '20px' : '0',
+      ...(fullPage && {
+        minHeight: '300px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+        backdropFilter: 'blur(10px)',
+      })
     },
     spinner: {
-      width: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
-      height: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
-      border: `${size === 'small' ? '2px' : '3px'} solid #f3f3f3`,
-      borderTop: `${size === 'small' ? '2px' : '3px'} solid #007bff`,
+      width: size === 'small' ? '24px' : size === 'large' ? '56px' : '40px',
+      height: size === 'small' ? '24px' : size === 'large' ? '56px' : '40px',
+      border: `${size === 'small' ? '3px' : '4px'} solid transparent`,
+      borderTop: `${size === 'small' ? '3px' : '4px'} solid #3b82f6`,
+      borderRight: `${size === 'small' ? '3px' : '4px'} solid #10b981`,
       borderRadius: '50%',
       animation: 'spin 1s linear infinite',
-      marginBottom: '10px',
+      marginBottom: '16px',
     },
     text: {
-      color: '#666',
-      fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
-      fontWeight: '500',
+      color: '#6b7280',
+      fontSize: size === 'small' ? '14px' : size === 'large' ? '18px' : '16px',
+      fontWeight: '600',
+      textAlign: 'center',
     }
   };
 
@@ -48,7 +57,7 @@ const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
   );
 };
 
-// Project Card Component
+// Enhanced Project Card Component
 const ProjectCard = ({ project, type }) => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -80,46 +89,59 @@ const ProjectCard = ({ project, type }) => {
 
   const cardStyle = {
     backgroundColor: '#fff',
-    borderRadius: '12px',
-    padding: '20px',
+    borderRadius: '16px',
+    padding: '24px',
     marginBottom: '20px',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e0e0e0',
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+    border: '1px solid #e8ecf0',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    overflow: 'hidden',
   };
 
   return (
     <div 
       style={cardStyle}
       onMouseEnter={(e) => {
-        e.target.style.transform = 'translateY(-2px)';
-        e.target.style.boxShadow = '0 8px 15px rgba(0, 0, 0, 0.15)';
+        e.currentTarget.style.transform = 'translateY(-8px)';
+        e.currentTarget.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.15)';
       }}
       onMouseLeave={(e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.08)';
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-        <h3 style={{ color: '#333', margin: '0', fontSize: '18px', fontWeight: '600' }}>
+      {/* Top gradient line */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '4px',
+        background: 'linear-gradient(90deg, #3b82f6, #10b981, #f59e0b)',
+      }}></div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <h3 style={{ color: '#1f2937', margin: '0', fontSize: '20px', fontWeight: '700' }}>
           {project.title || 'Untitled Project'}
         </h3>
         <span 
           style={{
             backgroundColor: getStatusColor(project.status),
             color: 'white',
-            padding: '4px 12px',
+            padding: '6px 16px',
             borderRadius: '20px',
             fontSize: '12px',
-            fontWeight: '500',
-            textTransform: 'capitalize'
+            fontWeight: '600',
+            textTransform: 'capitalize',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
           }}
         >
           {project.status || 'Unknown'}
         </span>
       </div>
 
-      <p style={{ color: '#666', marginBottom: '15px', lineHeight: '1.5' }}>
+      <p style={{ color: '#6b7280', marginBottom: '20px', lineHeight: '1.6', fontSize: '14px' }}>
         {project.description ? 
           (project.description.length > 150 ? 
             `${project.description.substring(0, 150)}...` : 
@@ -128,41 +150,64 @@ const ProjectCard = ({ project, type }) => {
         }
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', 
+        gap: '16px',
+        padding: '16px',
+        backgroundColor: '#f8fafc',
+        borderRadius: '12px',
+        border: '1px solid #e8ecf0',
+      }}>
         <div>
-          <strong style={{ color: '#333', fontSize: '14px' }}>Budget:</strong>
-          <p style={{ margin: '5px 0 0 0', color: '#28a745', fontWeight: '600' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+            <span style={{ fontSize: '16px' }}>💰</span>
+            <strong style={{ color: '#374151', fontSize: '14px' }}>Budget</strong>
+          </div>
+          <p style={{ margin: '0', color: '#059669', fontWeight: '700', fontSize: '16px' }}>
             {formatCurrency(project.budget)}
           </p>
         </div>
 
         {project.advance_payment && (
           <div>
-            <strong style={{ color: '#333', fontSize: '14px' }}>Advance:</strong>
-            <p style={{ margin: '5px 0 0 0', color: '#ffc107', fontWeight: '600' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '16px' }}>💳</span>
+              <strong style={{ color: '#374151', fontSize: '14px' }}>Advance</strong>
+            </div>
+            <p style={{ margin: '0', color: '#d97706', fontWeight: '700', fontSize: '16px' }}>
               {formatCurrency(project.advance_payment)}
             </p>
           </div>
         )}
 
         <div>
-          <strong style={{ color: '#333', fontSize: '14px' }}>Deadline:</strong>
-          <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+            <span style={{ fontSize: '16px' }}>📅</span>
+            <strong style={{ color: '#374151', fontSize: '14px' }}>Deadline</strong>
+          </div>
+          <p style={{ margin: '0', color: '#6b7280', fontWeight: '600' }}>
             {formatDate(project.deadline)}
           </p>
         </div>
 
         <div>
-          <strong style={{ color: '#333', fontSize: '14px' }}>Created:</strong>
-          <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+            <span style={{ fontSize: '16px' }}>📝</span>
+            <strong style={{ color: '#374151', fontSize: '14px' }}>Created</strong>
+          </div>
+          <p style={{ margin: '0', color: '#6b7280', fontWeight: '600' }}>
             {formatDate(project.created_at)}
           </p>
         </div>
 
         {project.applicants_count !== undefined && (
           <div>
-            <strong style={{ color: '#333', fontSize: '14px' }}>Applicants:</strong>
-            <p style={{ margin: '5px 0 0 0', color: '#007bff', fontWeight: '600' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '16px' }}>👥</span>
+              <strong style={{ color: '#374151', fontSize: '14px' }}>Applicants</strong>
+            </div>
+            <p style={{ margin: '0', color: '#3b82f6', fontWeight: '700', fontSize: '16px' }}>
               {project.applicants_count}
             </p>
           </div>
@@ -170,18 +215,30 @@ const ProjectCard = ({ project, type }) => {
 
         {project.rating && (
           <div>
-            <strong style={{ color: '#333', fontSize: '14px' }}>Rating:</strong>
-            <p style={{ margin: '5px 0 0 0', color: '#ffc107', fontWeight: '600' }}>
-              {project.rating}/5 ⭐
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+              <span style={{ fontSize: '16px' }}>⭐</span>
+              <strong style={{ color: '#374151', fontSize: '14px' }}>Rating</strong>
+            </div>
+            <p style={{ margin: '0', color: '#f59e0b', fontWeight: '700', fontSize: '16px' }}>
+              {project.rating}/5
             </p>
           </div>
         )}
       </div>
 
       {project.review && (
-        <div style={{ marginTop: '15px', padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
-          <strong style={{ color: '#333', fontSize: '14px' }}>Review:</strong>
-          <p style={{ margin: '5px 0 0 0', color: '#666', fontStyle: 'italic' }}>
+        <div style={{ 
+          marginTop: '16px', 
+          padding: '16px', 
+          backgroundColor: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', 
+          borderRadius: '12px',
+          border: '1px solid #bbf7d0',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '16px' }}>💬</span>
+            <strong style={{ color: '#15803d', fontSize: '14px' }}>Review</strong>
+          </div>
+          <p style={{ margin: '0', color: '#374151', fontStyle: 'italic', lineHeight: '1.5' }}>
             "{project.review}"
           </p>
         </div>
@@ -190,27 +247,80 @@ const ProjectCard = ({ project, type }) => {
   );
 };
 
-// Statistics Card Component
-const StatCard = ({ title, value, subValue, color, icon }) => (
+// Enhanced Statistics Card Component
+const StatCard = ({ title, value, subValue, color, icon, trend }) => (
   <div style={{
     backgroundColor: '#fff',
-    borderRadius: '12px',
-    padding: '20px',
+    borderRadius: '20px',
+    padding: '24px',
     textAlign: 'center',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-    border: '1px solid #e0e0e0',
-  }}>
-    <div style={{ fontSize: '24px', marginBottom: '10px' }}>{icon}</div>
-    <h3 style={{ color: color, fontSize: '28px', margin: '0 0 5px 0', fontWeight: '700' }}>
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+    border: '1px solid #e8ecf0',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    overflow: 'hidden',
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = 'translateY(-8px)';
+    e.currentTarget.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.15)';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.08)';
+  }}
+  >
+    {/* Top gradient line */}
+    <div style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '4px',
+      background: `linear-gradient(90deg, ${color}, ${color}99)`,
+    }}></div>
+
+    <div style={{ 
+      fontSize: '32px', 
+      marginBottom: '12px',
+      padding: '16px',
+      background: `${color}15`,
+      borderRadius: '16px',
+      display: 'inline-block',
+    }}>
+      {icon}
+    </div>
+    
+    <h3 style={{ 
+      color: color, 
+      fontSize: '32px', 
+      margin: '0 0 8px 0', 
+      fontWeight: '800',
+      background: `linear-gradient(135deg, ${color}, ${color}cc)`,
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+    }}>
       {value}
     </h3>
-    <p style={{ color: '#666', margin: '0', fontSize: '14px', fontWeight: '500' }}>
+    
+    <p style={{ color: '#6b7280', margin: '0', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
       {title}
     </p>
+    
     {subValue && (
-      <p style={{ color: '#999', margin: '5px 0 0 0', fontSize: '12px' }}>
+      <p style={{ color: '#9ca3af', margin: '8px 0 0 0', fontSize: '12px' }}>
         {subValue}
       </p>
+    )}
+    
+    {trend && (
+      <div style={{ 
+        marginTop: '8px',
+        fontSize: '12px',
+        color: trend > 0 ? '#10b981' : trend < 0 ? '#ef4444' : '#6b7280',
+        fontWeight: '600',
+      }}>
+        {trend > 0 ? '↗️' : trend < 0 ? '↘️' : '➡️'} {Math.abs(trend)}%
+      </div>
     )}
   </div>
 );
@@ -287,76 +397,123 @@ function ClientDashBoardContent() {
 
   return (
     <div className="client-dashboard">
-      <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ color: 'whitesmoke', marginBottom: '10px' }}>
-          Welcome back, {user.name}! 👋
-        </h1>
-        <p style={{ color: 'whitesmoke', fontSize: '16px' }}>
-          Here's an overview of your projects and activities
-        </p>
-      </div>
+      {/* Enhanced Header */}
+      <div style={{ 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        borderRadius: '24px',
+        padding: '32px',
+        marginBottom: '32px',
+        boxShadow: '0 20px 60px rgba(102, 126, 234, 0.25)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Background Pattern */}
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>')`,
+          pointerEvents: 'none',
+        }}></div>
 
-      <div style={{ marginBottom: '30px' }}>
-        <h2 style={{ color: 'whitesmoke', marginBottom: '15px', display: 'flex', alignItems: 'center' }}>
-          🔔 Notifications 
-          <span style={{ marginLeft: '10px' }}>
-            <Notifications />
-          </span>
-        </h2>
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h1 style={{ 
+                color: 'white', 
+                marginBottom: '8px', 
+                fontSize: '36px', 
+                fontWeight: '800',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+              }}>
+                <span style={{ fontSize: '40px', filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2))' }}>👋</span>
+                Welcome back, {user.name}!
+              </h1>
+              <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '18px', margin: '0', fontWeight: '400' }}>
+                Here's an overview of your projects and activities
+              </p>
+            </div>
+
+            {/* Enhanced Notifications - Now properly positioned */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '16px',
+            }}>
+              <EnhancedNotifications />
+            </div>
+          </div>
+        </div>
       </div>
 
       {loading ? (
         <div style={{ 
-          backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-          borderRadius: '12px', 
-          padding: '40px', 
-          margin: '20px 0' 
+          backgroundColor: 'white', 
+          borderRadius: '20px', 
+          margin: '20px 0',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
         }}>
-          <Spinner size="large" text="Loading your dashboard..." />
+          <Spinner size="large" text="Loading your dashboard..." fullPage={true} />
         </div>
       ) : error ? (
         <div style={{
-          backgroundColor: '#f8d7da',
-          color: '#721c24',
-          padding: '15px',
-          borderRadius: '8px',
-          border: '1px solid #f5c6cb'
+          backgroundColor: '#fef2f2',
+          color: '#dc2626',
+          padding: '20px',
+          borderRadius: '16px',
+          border: '1px solid #fecaca',
+          marginBottom: '24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
         }}>
-          <strong>Error:</strong> {error}
+          <span style={{ fontSize: '20px' }}>⚠️</span>
+          <div>
+            <strong>Error:</strong> {error}
+          </div>
         </div>
       ) : (
         <>
-          {/* Statistics Cards */}
+          {/* Enhanced Statistics Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '20px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '24px',
             marginBottom: '40px'
           }}>
             <StatCard
               title="Total Projects"
               value={stats.totalProjects}
-              color="#007bff"
+              color="#3b82f6"
               icon="📊"
             />
             <StatCard
               title="Active Projects"
               value={stats.activeProjects}
-              color="#28a745"
+              color="#10b981"
               icon="🚀"
             />
             <StatCard
               title="Completed Projects"
               value={stats.completedProjects}
-              color="#6f42c1"
+              color="#8b5cf6"
               icon="✅"
             />
-            
+            <StatCard
+              title="Total Investment"
+              value={formatCurrency(stats.totalBudget)}
+              color="#f59e0b"
+              icon="💰"
+            />
             {stats.avgRating && (
               <StatCard
                 title="Average Rating"
                 value={`${stats.avgRating}/5`}
-                color="#ffc107"
+                color="#ef4444"
                 icon="⭐"
               />
             )}
@@ -365,8 +522,17 @@ function ClientDashBoardContent() {
           {/* Active Projects Section */}
           {projectData.active.length > 0 && (
             <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ color: 'whitesmoke', marginBottom: '20px' }}>
-                🚀 Active Projects ({projectData.active.length})
+              <h2 style={{ 
+                color: '#1f2937', 
+                marginBottom: '24px',
+                fontSize: '28px',
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+              }}>
+                <span style={{ fontSize: '32px' }}>🚀</span>
+                Active Projects ({projectData.active.length})
               </h2>
               {projectData.active.map((project, index) => (
                 <ProjectCard key={project.job_id || index} project={project} type="active" />
@@ -377,8 +543,17 @@ function ClientDashBoardContent() {
           {/* Completed Projects Section */}
           {projectData.completed.length > 0 && (
             <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ color: 'whitesmoke', marginBottom: '20px' }}>
-                ✅ Completed Projects ({projectData.completed.length})
+              <h2 style={{ 
+                color: '#1f2937', 
+                marginBottom: '24px',
+                fontSize: '28px',
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+              }}>
+                <span style={{ fontSize: '32px' }}>✅</span>
+                Completed Projects ({projectData.completed.length})
               </h2>
               {projectData.completed.map((project, index) => (
                 <ProjectCard key={project.job_id || index} project={project} type="completed" />
@@ -386,33 +561,50 @@ function ClientDashBoardContent() {
             </div>
           )}
 
-          {/* Empty State */}
+          {/* Enhanced Empty State */}
           {stats.totalProjects === 0 && (
             <div style={{
               backgroundColor: '#fff',
-              borderRadius: '12px',
-              padding: '40px',
+              borderRadius: '24px',
+              padding: '64px 32px',
               textAlign: 'center',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+              border: '1px solid #e8ecf0',
             }}>
-              <div style={{ fontSize: '48px', marginBottom: '20px' }}>📝</div>
-              <h3 style={{ color: '#333', marginBottom: '10px' }}>No Projects Yet</h3>
-              <p style={{ color: '#666', marginBottom: '20px' }}>
-                Start by creating your first project to connect with skilled professionals.
+              <div style={{ fontSize: '80px', marginBottom: '24px' }}>📝</div>
+              <h3 style={{ color: '#1f2937', marginBottom: '12px', fontSize: '28px', fontWeight: '700' }}>
+                No Projects Yet
+              </h3>
+              <p style={{ color: '#6b7280', marginBottom: '32px', fontSize: '16px', lineHeight: '1.6' }}>
+                Start by creating your first project to connect with skilled professionals and bring your ideas to life.
               </p>
               <button
                 onClick={() => navigate('/create-job')}
                 style={{
-                  backgroundColor: '#007bff',
+                  background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
                   color: 'white',
                   border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '6px',
+                  padding: '16px 32px',
+                  borderRadius: '16px',
                   fontSize: '16px',
                   cursor: 'pointer',
-                  fontWeight: '600'
+                  fontWeight: '600',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 12px 35px rgba(59, 130, 246, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.3)';
                 }}
               >
+                <span style={{ fontSize: '18px' }}>🚀</span>
                 Create Your First Project
               </button>
             </div>
