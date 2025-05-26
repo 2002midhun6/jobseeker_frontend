@@ -6,6 +6,71 @@ import { AuthContext } from '../../context/AuthContext';
 import './ProfessionalDashboardBody.css';
 import ProfessionalNotifications from '../Notification/ProfessionalNotification';
 
+// Spinner Component
+const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
+  const spinnerStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px',
+    },
+    spinner: {
+      width: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      height: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
+      border: `${size === 'small' ? '2px' : '3px'} solid #f3f3f3`,
+      borderTop: `${size === 'small' ? '2px' : '3px'} solid #007bff`,
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+      marginBottom: '10px',
+    },
+    text: {
+      color: '#666',
+      fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
+      fontWeight: '500',
+    }
+  };
+
+  return (
+    <div style={spinnerStyles.container}>
+      <div style={spinnerStyles.spinner}></div>
+      <span style={spinnerStyles.text}>{text}</span>
+      <style>
+        {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
+// Full Page Spinner for initial loading
+const FullPageSpinner = ({ text = 'Loading...' }) => {
+  const fullPageStyles = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+  };
+
+  return (
+    <div style={fullPageStyles}>
+      <Spinner size="large" text={text} />
+    </div>
+  );
+};
+
 function ProfessionalDashBoardContent() {
   const { user, isAuthenticated} = useContext(AuthContext); 
   const navigate = useNavigate();
@@ -20,11 +85,9 @@ function ProfessionalDashBoardContent() {
 
   useEffect(() => {
     const checkProfile = async () => {
-      
       try {
         const response = await axios.get('https://api.midhung.in/api/profile/', {
           withCredentials: true,
-         
         });
         setHasProfile(true);
         setAvgRating(response.data.avg_rating || 0);
@@ -50,15 +113,13 @@ function ProfessionalDashBoardContent() {
     if (isAuthenticated && user && user.role === 'professional') {
       checkProfile();
     }
-  }, [isAuthenticated, user,  navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   useEffect(() => {
     const fetchProjectCountsAndReviews = async () => {
-      
       try {
         const response = await axios.get('https://api.midhung.in/api/professional-job-applications/', {
           withCredentials: true,
-         
         });
         const applications = Array.isArray(response.data.applications) ? response.data.applications : [];
         const activeCount = applications.filter(
@@ -75,7 +136,7 @@ function ProfessionalDashBoardContent() {
             job_id: app.job_details.job_id,
             title: app.job_details.title,
             rating: app.job_details.rating,
-            review: app.job_details.review || 'No review provided', // Add review field
+            review: app.job_details.review || 'No review provided',
             client_name: app.job_details.client_name || 'Unknown Client',
           }));
         setProjectCounts({ active: activeCount, completed: completedCount });
@@ -101,7 +162,7 @@ function ProfessionalDashBoardContent() {
     } else {
       setProjectLoading(false);
     }
-  }, [hasProfile,  navigate]);
+  }, [hasProfile, navigate]);
 
   useEffect(() => {
     if (!isAuthenticated || !user || user.role !== 'professional') {
@@ -109,21 +170,26 @@ function ProfessionalDashBoardContent() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  if (loading) return <div>Loading...</div>;
+  // Show full page spinner during initial loading
+  if (loading) return <FullPageSpinner text="Loading your dashboard..." />;
   if (!isAuthenticated || !user) return null;
 
   return (
-    
-   
     <div className="professional-dashboard">
-       
       <h1>Professional Dashboard</h1>
       <ProfessionalNotifications/>
       {hasProfile ? (
         <>
           <p style={{ color: 'white' }}>Welcome back to your Professional Dashboard, {user.name}!</p>
           {projectLoading ? (
-            <p>Loading project data...</p>
+            <div style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+              borderRadius: '8px', 
+              padding: '20px', 
+              margin: '20px 0' 
+            }}>
+              <Spinner size="medium" text="Loading project data..." />
+            </div>
           ) : projectError ? (
             <p className="error-message">{projectError}</p>
           ) : (
@@ -204,7 +270,7 @@ function ProfessionalDashBoardContent() {
         </>
       ) : (
         <div>
-          <p style={{ color: 'white' }}>Welcome to the Professional Dashboard, {user.name}! You don’t have a profile yet.</p>
+          <p style={{ color: 'white' }}>Welcome to the Professional Dashboard, {user.name}! You don't have a profile yet.</p>
           <button onClick={() => navigate('/create-professional-profile')} className="create-profile-btn">
             Create Professional Profile
           </button>
