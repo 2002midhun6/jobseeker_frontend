@@ -1,21 +1,39 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import './EnhanceNotifications.css';
 
 // Enhanced Spinner Component
-const Spinner = ({ size = 'small', color = '#3b82f6' }) => {
+const Spinner = ({ size = 'medium', text = 'Loading', inline = true, color = '#007bff' }) => {
   const spinnerStyles = {
-    width: size === 'small' ? '16px' : '24px',
-    height: size === 'small' ? '16px' : '24px',
-    border: `2px solid transparent`,
-    borderTop: `2px solid ${color}`,
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
+    container: {
+      display: 'flex',
+      flexDirection: inline ? 'row' : 'column',
+      alignItems: 'center',
+      gap: inline ? '8px' : '12px',
+      justifyContent: 'center',
+      padding: inline ? '0' : '10px',
+    },
+    spinner: {
+      width: size === 'small' ? '16px' : size === 'large' ? '24px' : '20px',
+      height: size === 'small' ? '16px' : size === 'large' ? '24px' : '20px',
+      border: `2px solid #f3f3f3`,
+      borderTop: `2px solid ${color}`,
+      borderRadius: '50%',
+      animation: 'spin 1s linear infinite',
+    },
+    text: {
+      color: '#666',
+      fontSize: size === 'small' ? '12px' : '14px',
+      fontWeight: '500',
+    }
   };
 
   return (
-    <div style={spinnerStyles}>
+    <div style={spinnerStyles.container}>
+      <div style={spinnerStyles.spinner}></div>
+      {text && <span style={spinnerStyles.text}>{text}</span>}
       <style>
         {`
           @keyframes spin {
@@ -29,7 +47,7 @@ const Spinner = ({ size = 'small', color = '#3b82f6' }) => {
 };
 
 // Individual Notification Item Component
-const NotificationItem = ({ notification, onMarkAsRead, onDelete, onRedirect }) => {
+const NotificationItem = ({ notification, userType, onMarkAsRead, onDelete, onRedirect }) => {
   const getNotificationIcon = (type) => {
     switch (type?.toLowerCase()) {
       case 'job_application': return '👥';
@@ -65,46 +83,63 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete, onRedirect }) 
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInDays < 7) return `${diffInDays}d ago`;
+    if (diffInDays < 10) return `${diffInDays}d ago`;
     return notificationDate.toLocaleDateString();
   };
 
-  const getRedirectPath = (notification) => {
+  const getRedirectPath = () => {
     const data = notification.data || {};
-    
-    switch (notification.notification_type?.toLowerCase()) {
-      case 'job_application':
-        return data.job_id ? `/job-applications/${data.job_id}` : '/client-project';
-      case 'payment':
-        return data.payment_id ? `/client-pending-payments` : '/client-transactions';
-      case 'project_update':
-        return data.project_id ? `/project/${data.project_id}` : '/client-project';
-      case 'message':
-        return data.conversation_id ? `/client-conversation/${data.conversation_id}` : '/conversations';
-      case 'rating':
-        return '/client-project';
-      default:
-        return '/client-dashboard';
+
+    if (userType === 'client') {
+      switch (notification.notification_type?.toLowerCase()) {
+        case 'job_application':
+          return data.job_id ? `/client-job-applications/${data.job_id}` : '/client-project';
+        case 'payment':
+          return data.payment_id ? `/client-pending-payments` : '/client-transactions';
+        case 'project_update':
+          return data.project_id ? `/client/project/${data.project_id}` : '/client-project';
+        case 'message':
+          return data.job_id ? `/client-conversation/${data.job_id}` : '/client-conversations';
+        case 'rating':
+          return '/client-project';
+        default:
+          return '/client-info';
+      }
+    } else if (userType === 'professional') {
+      switch (notification.notification_type?.toLowerCase()) {
+        case 'job_application':
+          return data.job_id ? `/professional-job/${data.job_id}` : '/professional-job';
+        case 'payment':
+          return data.payment_id ? `/professional-payments` : '/professional-transactions';
+        case 'project_update':
+          return data.project_id ? `/professional/project/${data.project_id}` : '/professional-job';
+        case 'message':
+          return data.job_id ? `/professional-conversation/${data.job_id}` : '/professional-conversations';
+        case 'rating':
+          return '/professional';
+        default:
+          return '/professional';
+      }
     }
+    return '/dashboard';
   };
 
-  const handleNotificationClick = () => {
+  const handleClick = () => {
     if (!notification.is_read) {
       onMarkAsRead(notification.id);
     }
-    
-    const redirectPath = getRedirectPath(notification);
+    const redirectPath = getRedirectPath();
     onRedirect(redirectPath);
   };
 
   return (
     <div className={`notification-item ${!notification.is_read ? 'unread' : ''}`}>
-      <div className="notification-content" onClick={handleNotificationClick}>
+      <div className="notification-content" onClick={handleClick}>
         <div className="notification-header">
           <div className="notification-icon-wrapper">
             <span 
               className="notification-icon"
-              style={{ backgroundColor: getNotificationColor(notification.notification_type) }}
+              style={{ backgroundColor: getNotificationColor(notification.notification_type)}}
             >
               {getNotificationIcon(notification.notification_type)}
             </span>
@@ -177,6 +212,7 @@ const NotificationItem = ({ notification, onMarkAsRead, onDelete, onRedirect }) 
 
 // Main Enhanced Notifications Component
 const EnhancedNotifications = () => {
+  const { user, isAuthenticated } = useContext(AuthContext);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -184,8 +220,22 @@ const EnhancedNotifications = () => {
   const [filter, setFilter] = useState('all'); // all, unread, read
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+
+  // Helper function to get WebSocket token
+  const getWebSocketToken = async () => {
+    try {
+      const response = await axios.get('https://api.midhung.in/api/websocket-token/', {
+        withCredentials: true
+      });
+      return response.data.access_token;
+    } catch (error) {
+      console.error('Failed to get WebSocket token:', error);
+      return null;
+    }
+  };
 
   // Fetch notifications
   const fetchNotifications = async (pageNum = 1, reset = false) => {
@@ -212,6 +262,73 @@ const EnhancedNotifications = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Initialize WebSocket
+  const initWebSocket = async () => {
+    const token = await getWebSocketToken();
+    if (!token) return;
+
+    const ws = new WebSocket(`wss://api.midhung.in/ws/notifications/?token=${token}`);
+    
+    ws.onopen = () => {
+      console.log('Notification WebSocket connected');
+    };
+    
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      console.log('Notification received:', data);
+      
+      if (data.type) {
+        // Create notification object
+        const notification = {
+          id: data.notification_id,
+          notification_type: data.type,
+          title: data.title || `New ${data.type.replace('_', ' ')}`,
+          message: data.message || `You have a new ${data.type.replace('_', ' ')} notification`,
+          data: data,
+          is_read: false,
+          created_at: data.timestamp || new Date().toISOString()
+        };
+        
+        // Add new notification to the top
+        setNotifications(prev => [notification, ...prev]);
+        setUnreadCount(prev => prev + 1);
+        
+        // Browser notification
+        if ('Notification' in window && Notification.permission === 'granted') {
+          const browserNotification = new Notification(notification.title, {
+            body: notification.message
+          });
+          
+          browserNotification.onclick = () => {
+            const path = getRedirectPath(notification, user?.role);
+            navigate(path);
+            window.focus();
+          };
+        }
+        
+        // Play notification sound
+        playNotificationSound();
+      }
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    ws.onclose = () => {
+      console.log('Notification WebSocket connection closed');
+      setTimeout(initWebSocket, 3000); // Reconnect
+    };
+    
+    setSocket(ws);
+  };
+
+  // Play notification sound
+  const playNotificationSound = () => {
+    const audio = new Audio('/notification-sound.mp3');
+    audio.play().catch(err => console.log('Failed to play notification sound:', err));
   };
 
   // Mark notification as read
@@ -294,7 +411,7 @@ const EnhancedNotifications = () => {
     fetchNotifications(1, true);
   };
 
-  // Close dropdown when clicking outside
+  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -311,7 +428,6 @@ const EnhancedNotifications = () => {
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscapeKey);
-      // Prevent body scroll when dropdown is open
       document.body.style.overflow = 'hidden';
     }
 
@@ -322,12 +438,24 @@ const EnhancedNotifications = () => {
     };
   }, [isOpen]);
 
-  // Initial fetch
+  // Initialize notifications and WebSocket
   useEffect(() => {
-    fetchNotifications(1, true);
-  }, [filter]);
+    if (!isAuthenticated || !user) return;
 
-  // Auto-refresh notifications every 30 seconds
+    fetchNotifications(1, true);
+    initWebSocket();
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    return () => {
+      if (socket) {
+        socket.close();
+      }
+    };
+  }, [isAuthenticated, user]);
+
+  // Auto-refresh notifications
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isOpen) {
@@ -337,6 +465,11 @@ const EnhancedNotifications = () => {
 
     return () => clearInterval(interval);
   }, [isOpen, filter]);
+
+  // Don't render if not authenticated
+  if (!isAuthenticated || !user) {
+    return null;
+  }
 
   const filteredNotifications = notifications.filter(notification => {
     if (filter === 'unread') return !notification.is_read;
@@ -440,6 +573,7 @@ const EnhancedNotifications = () => {
                   <NotificationItem
                     key={notification.id}
                     notification={notification}
+                    userType={user?.role}
                     onMarkAsRead={markAsRead}
                     onDelete={deleteNotification}
                     onRedirect={handleRedirect}
@@ -475,7 +609,7 @@ const EnhancedNotifications = () => {
               className="view-all-btn"
               onClick={() => {
                 setIsOpen(false);
-                navigate('/notifications');
+                navigate(user?.role === 'client' ? '/client-notifications' : '/professional-notifications');
               }}
             >
               View All Notifications
