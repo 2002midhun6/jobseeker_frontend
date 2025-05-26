@@ -356,11 +356,12 @@ function ConversationsList({ userType = 'client' }) {
       {/* Enhanced Header */}
       <div className="conversations-header">
         <div className="header-content">
+          <div>
           <button onClick={() => navigate(-1)} className="back-button">
             <span className="back-icon">←</span>
             <span>Back</span>
           </button>
-          
+          </div>
           <div className="header-title">
             <h2>
               <span className="title-icon">💬</span>
