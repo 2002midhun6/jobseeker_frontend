@@ -361,11 +361,11 @@ function ConversationsList({ userType = 'client' }) {
           <span>Back</span>
         </button>
         <div className="header-title">
-          <h2>
+          <h2 style={{color:"black"}}>
             <span className="title-icon">💬</span>
             Your Conversations
           </h2>
-          <p className="header-subtitle">
+          <p style={{color:"black"}} className="header-subtitle">
             Connect and communicate with your {userType === 'client' ? 'professionals' : 'clients'}
           </p>
         </div>
