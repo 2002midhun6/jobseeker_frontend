@@ -370,8 +370,23 @@ function JobPage() {
     
     try {
       setLoading(true);
-      const response = await axios.post('https://api.midhung.in/api/jobs/', formData, {
+      
+      // Prepare data with proper type conversion
+      const submitData = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        budget: parseFloat(formData.budget).toFixed(2), // Ensure proper decimal format
+        deadline: formData.deadline,
+        advance_payment: formData.advance_payment ? parseFloat(formData.advance_payment).toFixed(2) : '' // Handle empty advance payment
+      };
+
+      console.log('Submitting data:', submitData); // Debug log
+      
+      const response = await axios.post('https://api.midhung.in/api/jobs/', submitData, {
         withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       
       // Reset form
@@ -410,7 +425,8 @@ function JobPage() {
         }
       });
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Failed to post job';
+      console.error('Submit error:', err); // Debug log
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to post job';
       setError(errorMessage);
       setLoading(false);
       
