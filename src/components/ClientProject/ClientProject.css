@@ -731,47 +731,106 @@
   flex-wrap: wrap;
 }
 
-.action-button {
-  padding: 16px 32px;
-  border: none;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.action-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  text-align: center;
+  white-space: nowrap;
 }
 
-.action-button.primary {
-  background: linear-gradient(135deg, #3b82f6, #10b981);
-  color: white;
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+/* Primary Button (View Applications) */
+.action-btn.primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.action-button.primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(59, 130, 246, 0.4);
-}
-
-.action-button.secondary {
-  background: white;
-  color: #374151;
-  border: 2px solid #e8ecf0;
-}
-
-.action-button.secondary:hover {
-  background: #f8fafc;
-  border-color: #d1d5db;
+.action-btn.primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
-.button-icon {
-  font-size: 18px;
+.action-btn.primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
+.action-btn.primary:disabled {
+  background: #9ca3af;
+  color: #d1d5db;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Applicant Count Highlight */
+.action-btn.primary .applicant-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-weight: 700;
+  padding: 2px 8px;
+  margin-left: 6px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary:hover .applicant-count {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* Secondary Button (Edit Project) */
+.action-btn.secondary {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  color: #1f2937;
+  border: 1px solid #94a3b8;
+  box-shadow: 0 4px 12px rgba(148, 163, 184, 0.2);
+}
+
+.action-btn.secondary:hover {
+  background: linear-gradient(135deg, #cbd5e1 0%, #b8c2cc 100%);
+  color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(148, 163, 184, 0.3);
+}
+
+.action-btn.secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(148, 163, 184, 0.1);
+}
+
+.action-btn.secondary:disabled {
+  background: #f1f5f9;
+  color: #9ca3af;
+  border-color: #d1d5db;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Button Icon */
+.btn-icon {
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
+.action-btn:hover .btn-icon {
+  transform: scale(1.1);
+}
 /* Responsive Design */
 @media (max-width: 768px) {
   .client-projects-container {
