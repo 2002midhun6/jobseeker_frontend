@@ -573,47 +573,6 @@
   flex-wrap: wrap;
 }
 
-.action-btn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-}
-
-.action-btn.primary {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.action-btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-}
-
-.action-btn.secondary {
-  background: white;
-  color: #374151;
-  border: 2px solid #e8ecf0;
-}
-
-.action-btn.secondary:hover {
-  background: #f8fafc;
-  border-color: #cbd5e0;
-  transform: translateY(-2px);
-}
-
-.btn-icon {
-  font-size: 16px;
-}
-
 /* Enhanced Pagination */
 .pagination-enhanced {
   background: white;
