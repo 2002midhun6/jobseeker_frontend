@@ -623,7 +623,7 @@ function ClientProjects() {
         
         <div className="header-actions">
           <button 
-            onClick={() => navigate('/create-job')}
+            onClick={() => navigate('/client-job')}
             className="create-project-btn"
           >
             <span className="btn-icon">➕</span>
