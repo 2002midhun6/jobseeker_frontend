@@ -93,9 +93,9 @@ const NotificationItem = ({ notification, userType, onMarkAsRead, onDelete, onRe
     if (userType === 'client') {
       switch (notification.notification_type?.toLowerCase()) {
         case 'job_application':
-          return data.job_id ? `/client-job-applications/${data.job_id}` : '/client-project';
+          return data.job_id ? '/client-project' : '/client-project';
         case 'payment':
-          return data.payment_id ? `/client-pending-payments` : '/client-transactions';
+          return data.payment_id ? '/client-pending-payments' : '/client-transactions';
         case 'project_update':
           return data.project_id ? `/client/project/${data.project_id}` : '/client-project';
         case 'message':
