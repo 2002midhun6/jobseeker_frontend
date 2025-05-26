@@ -355,24 +355,22 @@ function ConversationsList({ userType = 'client' }) {
     <div className="conversations-container">
       {/* Enhanced Header */}
       <div className="conversations-header">
-        <div className="header-content">
-          <div>
-          <button onClick={() => navigate(-1)} className="back-button">
-            <span className="back-icon">←</span>
-            <span>Back</span>
-          </button>
-          </div>
-          <div className="header-title">
-            <h2>
-              <span className="title-icon">💬</span>
-              Your Conversations
-            </h2>
-            <p className="header-subtitle">
-              Connect and communicate with your {userType === 'client' ? 'professionals' : 'clients'}
-            </p>
-          </div>
+      <div className="header-content">
+        <button onClick={() => navigate(-1)} className="back-button">
+          <span className="back-icon">←</span>
+          <span>Back</span>
+        </button>
+        <div className="header-title">
+          <h2>
+            <span className="title-icon">💬</span>
+            Your Conversations
+          </h2>
+          <p className="header-subtitle">
+            Connect and communicate with your {userType === 'personal' ? 'clients' : 'professionals'}
+          </p>
         </div>
       </div>
+    </div>
 
       {loading ? (
         <div className="loading-container">
