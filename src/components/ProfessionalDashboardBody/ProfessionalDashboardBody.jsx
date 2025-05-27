@@ -26,7 +26,7 @@ const StatCard = ({ title, value, subValue, colorClass, icon, trend, onClick }) 
       {icon}
     </div>
     
-    <h3 className={`stat-card-value ${colorClass}`}>
+    <h3 style={{color:'black'}} className={`stat-card-value ${colorClass}`}>
       {value}
     </h3>
     
