@@ -131,7 +131,7 @@ function ProfessionalTransactions() {
 
   // Pagination Controls Component
   const PaginationControls = ({ totalItems }) => {
-    const pageCount = getPageCount(totalItems);
+    const pageCount = 1;
     const pages = [];
 
     for (let i = 1; i <= pageCount; i++) {
@@ -237,10 +237,10 @@ function ProfessionalTransactions() {
           <table className="transactions-table">
             <thead>
               <tr>
-                <th>Job Title</th>
-                <th>Client</th>
-                <th>Amount</th>
-                <th>Type</th>
+                <th style={{color:'black'}}>Job Title</th>
+                <th style={{color:'black'}}>Client</th>
+                <th style={{color:'black'}}>Amount</th>
+                <th style={{color:'black'}}>Type</th>
               </tr>
             </thead>
             <tbody>

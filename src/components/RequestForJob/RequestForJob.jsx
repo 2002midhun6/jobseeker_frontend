@@ -255,7 +255,7 @@ function ClientJobApplications() {
 
                   {app.status === 'Applied' && (
                     <div className="application-actions">
-                      <button
+                      <button 
                         onClick={() => handleAccept(app.application_id)}
                         className={`accept-btn ${!isAvailable ? 'disabled' : ''}`}
                         disabled={!isAvailable}
