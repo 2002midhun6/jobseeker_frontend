@@ -88,7 +88,7 @@ function ProfessionalJobs() {
     const isAvailable = profileData.availability_status === 'Available';
     const isVerified = profileData.verify_status === 'Verified';
     
-    return isAvailable ;
+    return isAvailable;
   }, [profileData]);
 
   const handleApply = async (jobId) => {
@@ -181,6 +181,38 @@ function ProfessionalJobs() {
     navigate('/professional-profile');
   };
 
+  // Format currency
+  const formatCurrency = (amount) => {
+    if (!amount) return 'Not specified';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not specified';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  // Format datetime
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'Not specified';
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (!isAuthenticated || !user) {
     return null;
   }
@@ -191,7 +223,7 @@ function ProfessionalJobs() {
       <div className="jobs-container">
         <div className="jobs-card">
           <h2 className="jobs-title">Available Jobs</h2>
-          <p className="loading-message">Loading...</p>
+          <div className="loading-message">Loading available jobs...</div>
         </div>
       </div>
     );
@@ -222,7 +254,6 @@ function ProfessionalJobs() {
               {profileData.verify_status === 'Not Verified' && profileData.denial_reason && (
                 <span> Reason: {profileData.denial_reason}</span>
               )}
-              
             </p>
           )}
         </div>
@@ -262,7 +293,9 @@ function ProfessionalJobs() {
         </div>
         
         {filteredJobs.length === 0 ? (
-          <p className="empty-message">No open jobs match your search.</p>
+          <div className="empty-message">
+            No open jobs match your search criteria.
+          </div>
         ) : (
           <div className="job-list">
             <ul className="job-list-ul">
@@ -271,22 +304,35 @@ function ProfessionalJobs() {
                   <h3>Client: {job.client_id?.name || 'N/A'}</h3>
                   <h4>{job.title || 'Untitled Job'}</h4>
                   <p>{job.description || 'No description provided'}</p>
-                  <p>Budget: ${job.budget || 'N/A'}</p>
-                  <p>Deadline: {job.deadline ? new Date(job.deadline).toLocaleDateString() : 'N/A'}</p>
-                  <p>Advance Payment: {job.advance_payment ? `$${job.advance_payment}` : 'None'}</p>
-                  <p>Posted: {job.created_at ? new Date(job.created_at).toLocaleString() : 'N/A'}</p>
+                  
+                  <div className="job-details">
+                    <div className="job-detail-item budget">
+                      Budget: {formatCurrency(job.budget)}
+                    </div>
+                    <div className="job-detail-item deadline">
+                      Deadline: {formatDate(job.deadline)}
+                    </div>
+                    <div className="job-detail-item advance">
+                      Advance: {job.advance_payment ? formatCurrency(job.advance_payment) : 'None'}
+                    </div>
+                    <div className="job-detail-item posted">
+                      Posted: {formatDateTime(job.created_at)}
+                    </div>
+                  </div>
+
                   <button
                     className={`apply-button ${!canApplyForJobs() ? 'disabled' : ''}`}
                     onClick={() => handleApply(job.job_id)}
                     disabled={!canApplyForJobs()}
                   >
-                    Apply
+                    {canApplyForJobs() ? 'Apply Now' : 'Cannot Apply'}
                   </button>
                 </li>
               ))}
             </ul>
-            <div className="pagination-container">
-              {totalPages > 1 && (
+            
+            {totalPages > 1 && (
+              <div className="pagination-container">
                 <div className="pagination">
                   <button
                     onClick={() => paginate(currentPage - 1)}
@@ -312,15 +358,16 @@ function ProfessionalJobs() {
                     Next
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
-        <p className="back-link">
-          <a href="#" onClick={() => navigate('/professional-dashboard')}>
+        
+        <div className="back-link">
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/professional-dashboard'); }}>
             Back to Dashboard
           </a>
-        </p>
+        </div>
       </div>
     </div>
   );
