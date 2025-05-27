@@ -131,7 +131,7 @@ function ProfessionalTransactions() {
 
   // Pagination Controls Component
   const PaginationControls = ({ totalItems }) => {
-    const pageCount = 1;
+    const pageCount = getPageCount(totalItems);
     const pages = [];
 
     for (let i = 1; i <= pageCount; i++) {

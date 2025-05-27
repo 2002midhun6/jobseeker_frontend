@@ -5,49 +5,46 @@ import { AuthContext } from '../../context/AuthContext';
 import Swal from 'sweetalert2';
 import './AdminVerification.css';
 
-// Spinner Component (copied from ProfessionalDashBoardContent.jsx)
-const Spinner = ({ size = 'medium', text = 'Loading...' }) => {
-  const spinnerStyles = {
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px',
-    },
-    spinner: {
-      width: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
-      height: size === 'small' ? '20px' : size === 'large' ? '60px' : '40px',
-      border: `${size === 'small' ? '2px' : '3px'} solid #f3f3f3`,
-      borderTop: `${size === 'small' ? '2px' : '3px'} solid #007bff`,
-      borderRadius: '50%',
-      animation: 'spin 1s linear infinite',
-      marginBottom: '10px',
-    },
-    text: {
-      color: '#666',
-      fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
-      fontWeight: '500',
-    }
+// Enhanced Spinner Component
+const AdminVerificationSpinner = ({ text = 'Loading...' }) => (
+  <div className="admin-verification-spinner-container">
+    <div className="admin-verification-loading-spinner"></div>
+    <p className="admin-verification-spinner-text">{text}</p>
+  </div>
+);
+
+// Verification Statistics Component
+const VerificationStats = ({ requests, filteredRequests }) => {
+  const stats = {
+    total: requests.length,
+    pending: requests.filter(req => req.verify_status === 'Pending').length,
+    filtered: filteredRequests.length,
+    totalSkills: [...new Set(requests.flatMap(req => req.skills || []))].length
   };
 
   return (
-    <div style={spinnerStyles.container}>
-      <div style={spinnerStyles.spinner}></div>
-      <span style={spinnerStyles.text}>{text}</span>
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
+    <div className="verification-stats">
+      <div className="verification-stat-item">
+        <h4>Total Requests</h4>
+        <p>{stats.total}</p>
+      </div>
+      <div className="verification-stat-item">
+        <h4>Pending Reviews</h4>
+        <p>{stats.pending}</p>
+      </div>
+      <div className="verification-stat-item">
+        <h4>Filtered Results</h4>
+        <p>{stats.filtered}</p>
+      </div>
+      <div className="verification-stat-item">
+        <h4>Unique Skills</h4>
+        <p>{stats.totalSkills}</p>
+      </div>
     </div>
   );
 };
 
-// Separate modal component to prevent re-renders of the parent
+// Enhanced Denial Reason Modal
 const DenialReasonModal = React.memo(({ 
   showModal, 
   denialReason, 
@@ -63,6 +60,14 @@ const DenialReasonModal = React.memo(({
     }
   }, [showModal]);
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && denialReason.trim()) {
+      onSubmit();
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
   return (
     <div className="modal-overlay" style={{ display: showModal ? 'flex' : 'none' }}>
       <div className="denial-modal">
@@ -71,16 +76,21 @@ const DenialReasonModal = React.memo(({
           ref={inputRef}
           type="text"
           className="denial-reason-input"
-          placeholder="Reason for denial"
+          placeholder="Enter specific reason for denial (e.g., Invalid document, Insufficient information)"
           value={denialReason}
           onChange={onReasonChange}
+          onKeyDown={handleKeyPress}
           dir="ltr"
         />
         <div className="modal-buttons">
           <button className="btn cancel-btn" onClick={onCancel}>
             Cancel
           </button>
-          <button className="btn deny-btn" onClick={onSubmit}>
+          <button 
+            className="btn deny-btn" 
+            onClick={onSubmit}
+            disabled={!denialReason.trim()}
+          >
             Submit Denial
           </button>
         </div>
@@ -89,49 +99,139 @@ const DenialReasonModal = React.memo(({
   );
 });
 
-// Separate pagination component to prevent re-renders
-const PaginationControls = React.memo(({ currentPage, pageCount, onPageChange }) => {
-  const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
+// Enhanced Pagination Component
+const PaginationControls = React.memo(({ currentPage, totalItems, itemsPerPage, onPageChange }) => {
+  const pageCount = Math.ceil(totalItems.length / itemsPerPage);
+  
+  if (pageCount <= 1) return null;
+
+  const maxVisiblePages = 5;
+  const pages = [];
+  
+  // Calculate which pages to show
+  let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+  let endPage = Math.min(pageCount, startPage + maxVisiblePages - 1);
+  
+  // Adjust start page if we're near the end
+  if (endPage - startPage + 1 < maxVisiblePages) {
+    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+  }
+
+  // Add page numbers
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i);
+  }
+
+  const startIndex = (currentPage - 1) * itemsPerPage + 1;
+  const endIndex = Math.min(currentPage * itemsPerPage, totalItems.length);
 
   return (
-    <div className="pagination">
-      <button
-        disabled={currentPage === 1}
-        onClick={() => onPageChange(currentPage - 1)}
-        className="page-btn"
-      >
-        Previous
-      </button>
-      {pages.map((page) => (
+    <div style={{ marginTop: '32px' }}>
+      {/* Pagination Info */}
+      <div style={{
+        textAlign: 'center',
+        marginBottom: '16px',
+        color: '#6b7280',
+        fontSize: '14px',
+        fontWeight: '500'
+      }}>
+        Showing {startIndex} to {endIndex} of {totalItems.length} verification requests
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="pagination">
         <button
-          key={page}
-          onClick={() => onPageChange(page)}
-          className={`page-btn ${currentPage === page ? 'active' : ''}`}
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
+          className="page-btn"
         >
-          {page}
+          Previous
         </button>
-      ))}
-      <button
-        disabled={currentPage === pageCount}
-        onClick={() => onPageChange(currentPage + 1)}
-        className="page-btn"
-      >
-        Next
-      </button>
+        
+        {pages.map((page) => (
+          <button
+            key={page}
+            onClick={() => onPageChange(page)}
+            className={`page-btn ${currentPage === page ? 'active' : ''}`}
+          >
+            {page}
+          </button>
+        ))}
+        
+        <button
+          disabled={currentPage === pageCount}
+          onClick={() => onPageChange(currentPage + 1)}
+          className="page-btn"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 });
 
-// The verification request item component
+// Enhanced Verification Item Component
 const VerificationItem = React.memo(({ request, onVerify, onDenyClick }) => {
+  const renderSkills = () => {
+    if (!request.skills || request.skills.length === 0) return null;
+    
+    return (
+      <div className="skills-display">
+        {request.skills.slice(0, 6).map((skill, index) => (
+          <span key={index} className="skill-tag">{skill}</span>
+        ))}
+        {request.skills.length > 6 && (
+          <span className="skill-tag">+{request.skills.length - 6} more</span>
+        )}
+      </div>
+    );
+  };
+
+  const getStatusBadge = (status) => (
+    <span className={`status-badge status-${status.toLowerCase().replace(' ', '-')}`}>
+      {status}
+    </span>
+  );
+
   return (
     <li className="verification-item">
       <div className="professional-info">
-        <h3><strong>Name:</strong> {request.user?.name}</h3>
-        <p><strong>Bio:</strong> {request.bio || 'No bio available'}</p>
-        <p><strong>Skills:</strong> {request.skills?.join(', ') || 'None listed'}</p>
-        <p><strong>Experience:</strong> {request.experience_years} years</p>
-        <p><strong>Status:</strong> {request.verify_status}</p>
+        <h3>
+          <strong>Name:</strong> {request.user?.name || 'Unknown'}
+        </h3>
+        
+        <p>
+          <strong>Email:</strong> {request.user?.email || 'Not provided'}
+        </p>
+        
+        <p>
+          <strong>Bio:</strong> {request.bio || 'No bio available'}
+        </p>
+        
+        <p>
+          <strong>Skills:</strong> 
+          {request.skills && request.skills.length > 0 ? (
+            <>
+              <span style={{ marginLeft: '8px' }}>
+                {request.skills.slice(0, 3).join(', ')}
+                {request.skills.length > 3 ? '...' : ''}
+              </span>
+              {renderSkills()}
+            </>
+          ) : (
+            ' None listed'
+          )}
+        </p>
+        
+        <p>
+          <strong>Experience:</strong> {request.experience_years || 0} years
+        </p>
+        
+        <p>
+          <strong>Status:</strong> 
+          {getStatusBadge(request.verify_status || 'Pending')}
+        </p>
+        
         {request.verify_doc ? (
           <a
             href={`https://jobseeker-69742084525.us-central1.run.app${request.verify_doc}`}
@@ -141,21 +241,35 @@ const VerificationItem = React.memo(({ request, onVerify, onDenyClick }) => {
             View Verification Document
           </a>
         ) : (
-          <p>No document uploaded</p>
+          <p style={{ 
+            color: '#ef4444', 
+            fontWeight: '600',
+            background: 'linear-gradient(135deg, #fee2e2, #fecaca)',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            border: '1px solid #fca5a5',
+            marginTop: '8px'
+          }}>
+            ⚠️ No verification document uploaded
+          </p>
         )}
       </div>
+      
       <div className="action-buttons">
         <button
           onClick={() => onVerify(request.user.id)}
           className="verify-btn"
+          disabled={!request.verify_doc}
+          title={!request.verify_doc ? 'Cannot verify without document' : 'Approve this professional'}
         >
-          Verify
+          Verify Professional
         </button>
         <button
           onClick={() => onDenyClick(request.user.id)}
           className="deny-btn"
+          title="Deny this verification request"
         >
-          Deny
+          Deny Request
         </button>
       </div>
     </li>
@@ -168,36 +282,72 @@ function AdminProfessionalVerification() {
   const { user, isAuthenticated } = authContext || { user: null, isAuthenticated: false };
 
   const [requests, setRequests] = useState([]);
+  const [filteredRequests, setFilteredRequests] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [selectedProfessionalId, setSelectedProfessionalId] = useState(null);
   const [denialReason, setDenialReason] = useState('');
   const [showDenialModal, setShowDenialModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
+        setLoading(true);
+        setError('');
         const response = await axios.get('https://api.midhung.in/api/admin/verification-requests/', {
           withCredentials: true,
         });
-        setRequests(response.data);
-        setLoading(false);
+        setRequests(response.data || []);
+        setFilteredRequests(response.data || []);
       } catch (err) {
         console.error('Error fetching requests:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: err.response?.data?.error || 'Failed to fetch verification requests',
-          confirmButtonColor: '#dc3545',
-        });
+        const errorMessage = err.response?.data?.error || 'Failed to fetch verification requests';
+        setError(errorMessage);
+        
+        if (err.response?.status !== 401) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: errorMessage,
+            confirmButtonColor: '#dc3545',
+          });
+        }
+      } finally {
         setLoading(false);
       }
     };
 
-    fetchRequests();
-  }, [navigate]);
+    if (isAuthenticated && user) {
+      fetchRequests();
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  // Handle search functionality
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredRequests(requests);
+      setCurrentPage(1);
+      return;
+    }
+
+    const filtered = requests.filter(request =>
+      request.user?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.user?.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.bio?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.skills?.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+
+    setFilteredRequests(filtered);
+    setCurrentPage(1);
+  }, [searchQuery, requests]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
   const handleVerify = useCallback((professionalId) => {
     handleAction(professionalId, 'verify');
@@ -213,8 +363,8 @@ function AdminProfessionalVerification() {
     if (!denialReason.trim()) {
       Swal.fire({
         icon: 'warning',
-        title: 'Required',
-        text: 'Please provide a reason for denial',
+        title: 'Required Field',
+        text: 'Please provide a specific reason for denial',
         confirmButtonColor: '#dc3545',
       });
       return;
@@ -244,7 +394,16 @@ function AdminProfessionalVerification() {
         timerProgressBar: true,
       });
       
-      setRequests((prev) => prev.filter((req) => req.user.id !== professionalId));
+      // Remove the processed request from the list
+      const updatedRequests = requests.filter((req) => req.user.id !== professionalId);
+      setRequests(updatedRequests);
+      
+      // Reset to page 1 if current page becomes empty
+      const newPageCount = Math.ceil(updatedRequests.length / itemsPerPage);
+      if (currentPage > newPageCount && newPageCount > 0) {
+        setCurrentPage(newPageCount);
+      }
+      
     } catch (err) {
       console.error('Request failed:', err);
       Swal.fire({
@@ -264,10 +423,14 @@ function AdminProfessionalVerification() {
 
   const handleModalCancel = useCallback(() => {
     setShowDenialModal(false);
+    setDenialReason('');
+    setSelectedProfessionalId(null);
   }, []);
 
   const handlePageChange = useCallback((page) => {
     setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const paginate = (items, page) => {
@@ -275,38 +438,22 @@ function AdminProfessionalVerification() {
     return items.slice(startIndex, startIndex + itemsPerPage);
   };
 
-  const getPageCount = (items) => Math.ceil(items.length / itemsPerPage);
-  const pageCount = getPageCount(requests);
-
   if (loading) {
-    return (
-      <div style={{ margin: '20px 0', textAlign: 'center' }}>
-        <Spinner size="medium" text="Loading verification requests..." />
-      </div>
-    );
+    return <AdminVerificationSpinner text="Loading verification requests..." />;
   }
 
-  const paginatedRequests = paginate(requests, currentPage);
+  const paginatedRequests = paginate(filteredRequests, currentPage);
 
   return (
     <>
+      {/* Loading Overlay */}
       {actionLoading && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999,
-        }}>
-          <Spinner size="medium" text="Processing action..." />
+        <div className="loading-overlay">
+          <AdminVerificationSpinner text="Processing verification..." />
         </div>
       )}
       
+      {/* Denial Reason Modal */}
       <DenialReasonModal 
         showModal={showDenialModal}
         denialReason={denialReason}
@@ -316,10 +463,32 @@ function AdminProfessionalVerification() {
       />
       
       <div className="admin-verification-container">
-        <h2 style={{ color: 'white' }}>Professional Verification Requests</h2>
+        <h2>Professional Verification Requests</h2>
+        
+        {/* Verification Statistics */}
+        {!error && <VerificationStats requests={requests} filteredRequests={filteredRequests} />}
+        
+        {/* Search Bar */}
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Search by name, email, bio, or skills..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="search-input"
+          />
+        </div>
+        
+        {/* Error Message */}
         {error && <div className="error-message">{error}</div>}
-        {requests.length === 0 ? (
-          <p>No pending verification requests.</p>
+        
+        {/* Main Content */}
+        {filteredRequests.length === 0 ? (
+          <div className="empty-state">
+            {searchQuery 
+              ? 'No verification requests found matching your search.' 
+              : 'No pending verification requests at this time.'}
+          </div>
         ) : (
           <>
             <ul className="verification-list">
@@ -332,9 +501,12 @@ function AdminProfessionalVerification() {
                 />
               ))}
             </ul>
+            
+            {/* Pagination */}
             <PaginationControls 
               currentPage={currentPage}
-              pageCount={pageCount}
+              totalItems={filteredRequests}
+              itemsPerPage={itemsPerPage}
               onPageChange={handlePageChange}
             />
           </>
