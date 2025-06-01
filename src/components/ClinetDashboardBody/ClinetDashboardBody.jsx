@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './ClientDashboardBody.css';
 import EnhancedNotifications from './EnhancedNotifications' // Updated import
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
   const spinnerStyles = {
@@ -348,7 +348,7 @@ function ClientDashBoardContent() {
   useEffect(() => {
     const fetchProjectCounts = async () => {
       try {
-        const response = await axios.get('https://api.midhung.in/api/client-project/', {
+        const response = await axios.get(`${baseUrl}/api/client-project/`, {
           withCredentials: true,
         });
         
@@ -504,10 +504,8 @@ function ClientDashBoardContent() {
               icon="✅"
             />
             <StatCard
-              title="Total Investment"
-              value={formatCurrency(stats.totalBudget)}
-              color="#f59e0b"
-              icon="💰"
+              title="Client"
+            color="#8b5cf6"
             />
             {stats.avgRating && (
               <StatCard

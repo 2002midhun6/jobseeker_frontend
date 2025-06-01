@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import './ClientPaymentPending.css';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
   const spinnerStyles = {
@@ -358,7 +358,7 @@ function ClientPendingPayments() {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const response = await axios.get('https://api.midhung.in/api/client-pending-payments/', {
+        const response = await axios.get(`${baseUrl}/api/client-pending-payments/`, {
           withCredentials: true,
         });
         console.log('Fetch Pending Payments Response:', response.data);
@@ -448,7 +448,7 @@ function ClientPendingPayments() {
           console.log('Verification Payload:', payload);
 
           const verifyResponse = await axios.post(
-            'https://api.midhung.in/api/verify-payment/',
+            `${baseUrl}/api/verify-payment/`,
             payload,
             { withCredentials: true }
           );

@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './ProfessionalDashboardBody.css';
 import ProfessionalNotifications from '../Notification/ProfessionalNotification';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
   return (
@@ -132,7 +132,7 @@ function ProfessionalDashBoardContent() {
   useEffect(() => {
     const checkProfile = async () => {
       try {
-        const response = await axios.get('https://api.midhung.in/api/profile/', {
+        const response = await axios.get(`${baseUrl}/api/profile/`, {
           withCredentials: true,
         });
         setHasProfile(true);
@@ -164,7 +164,7 @@ function ProfessionalDashBoardContent() {
   useEffect(() => {
     const fetchProjectCountsAndReviews = async () => {
       try {
-        const response = await axios.get('https://api.midhung.in/api/professional-job-applications/', {
+        const response = await axios.get(`${baseUrl}/api/professional-job-applications/`, {
           withCredentials: true,
         });
         const applications = Array.isArray(response.data.applications) ? response.data.applications : [];
@@ -247,7 +247,7 @@ function ProfessionalDashBoardContent() {
 
             {/* Enhanced Notifications */}
             <div className="dashboard-notifications">
-              <ProfessionalNotifications />
+            <ProfessionalNotifications />
             </div>
           </div>
         </div>

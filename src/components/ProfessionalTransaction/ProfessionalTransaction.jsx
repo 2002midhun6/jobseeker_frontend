@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
 import './ProfessionalTransaction.css';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 function ProfessionalTransactions() {
   const { user } = useContext(AuthContext) || { user: null };
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ function ProfessionalTransactions() {
     const fetchTransactions = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://api.midhung.in/api/professional/transactions/', {
+        const response = await axios.get(`${baseUrl}/api/professional/transactions/`, {
           withCredentials: true,
         });
         const fetchedTransactions = response.data.transactions || [];

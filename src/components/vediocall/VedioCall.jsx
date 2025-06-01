@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef ,useContext} from 'react';
 import './VideoCall.css';
 import { AuthContext } from '../../context/AuthContext';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 const ICE_SERVERS = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -54,7 +54,7 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
           throw new Error('No WebSocket auth token received');
         }
 
-        const wsUrl = `wss://api.midhung.in/ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
+        const wsUrl = `wss://${baseUrl}//ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
         console.log('Connecting to video call WebSocket:', wsUrl);
 
         const ws = new WebSocket(wsUrl);

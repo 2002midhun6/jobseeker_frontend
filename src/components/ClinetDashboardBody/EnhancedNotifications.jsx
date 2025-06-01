@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import './EnhanceNotifications.css';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading', inline = true, color = '#007bff' }) => {
   const spinnerStyles = {
@@ -103,7 +103,7 @@ const NotificationItem = ({ notification, userType, onMarkAsRead, onDelete, onRe
         case 'rating':
           return '/client-project';
         default:
-          return '/client-info';
+          return '/client-pending-payments';
       }
     } else if (userType === 'professional') {
       switch (notification.notification_type?.toLowerCase()) {
@@ -230,7 +230,7 @@ const EnhancedNotifications = () => {
   // Helper function to get WebSocket token
   const getWebSocketToken = async () => {
     try {
-      const response = await axios.get('https://api.midhung.in/api/websocket-token/', {
+      const response = await axios.get(`${baseUrl}/api/websocket-token/`, {
         withCredentials: true
       });
       return response.data.access_token;
@@ -245,7 +245,7 @@ const EnhancedNotifications = () => {
     try {
       // Try the enhanced endpoint first
       const response = await axios.get(
-        'https://api.midhung.in/api/notifications/?page=1',
+        `${baseUrl}/api/notifications/?page=1`,
         { withCredentials: true }
       );
       
@@ -272,7 +272,7 @@ const EnhancedNotifications = () => {
       if (apiType === 'enhanced') {
         // Try enhanced API first
         response = await axios.get(
-          `https://api.midhung.in/api/notifications/?page=${pageNum}&filter=${filter}`,
+          `${baseUrl}/api/notifications/?page=${pageNum}&filter=${filter}`,
           { withCredentials: true }
         );
         
@@ -288,7 +288,7 @@ const EnhancedNotifications = () => {
         setHasMore(newNotifications.length >= 10);
       } else {
         // Fall back to original API
-        response = await axios.get('https://api.midhung.in/api/notifications/', {
+        response = await axios.get(`${baseUrl}/api/notifications/`, {
           withCredentials: true
         });
         
@@ -331,7 +331,7 @@ const EnhancedNotifications = () => {
     const token = await getWebSocketToken();
     if (!token) return;
 
-    const ws = new WebSocket(`wss://api.midhung.in/ws/notifications/?token=${token}`);
+    const ws = new WebSocket(`wss://${baseUrl}//ws/notifications/?token=${token}`);
     
     ws.onopen = () => {
       console.log('Notification WebSocket connected');
@@ -398,13 +398,13 @@ const EnhancedNotifications = () => {
       // Try enhanced API first
       try {
         await axios.patch(
-          `https://api.midhung.in/api/notifications/${notificationId}/read/`,
+          `${baseUrl}/api/notifications/${notificationId}/read/`,
           {},
           { withCredentials: true }
         );
       } catch (error) {
         // Fall back to original API
-        await axios.post('https://api.midhung.in/api/notifications/mark-read/', {
+        await axios.post(`${baseUrl}/api/notifications/mark-read/`, {
           notification_id: notificationId
         }, {
           withCredentials: true
@@ -431,14 +431,14 @@ const EnhancedNotifications = () => {
       // Try enhanced API first
       try {
         await axios.patch(
-          'https://api.midhung.in/api/notifications/mark-all-read/',
+          `${baseUrl}/api/notifications/mark-all-read/`,
           {},
           { withCredentials: true }
         );
       } catch (error) {
         // Fall back to original API
         await axios.post(
-          'https://api.midhung.in/api/notifications/mark-all-read/',
+          `${baseUrl}/api/notifications/mark-all-read/`,
           {},
           { withCredentials: true }
         );
@@ -459,7 +459,7 @@ const EnhancedNotifications = () => {
     
     try {
       await axios.delete(
-        `https://api.midhung.in/api/notifications/${notificationId}/`,
+       `${baseUrl}/api/notifications/${notificationId}/`,
         { withCredentials: true }
       );
 

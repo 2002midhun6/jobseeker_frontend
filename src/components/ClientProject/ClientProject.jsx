@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './ClientProject.css';
+const baseUrl = import.meta.env.VITE_API_URL;
 
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
@@ -109,14 +110,6 @@ const ProjectStats = ({ projects }) => {
         </div>
       </div>
       
-      <div className="stat-card">
-        <div className="stat-icon">💰</div>
-        <div className="stat-content">
-          <div className="stat-number">{formatCurrency(totalBudget)}</div>
-          <div className="stat-label">Total Investment</div>
-        </div>
-      </div>
-      
       {avgRating && (
         <div className="stat-card">
           <div className="stat-icon">⭐</div>
@@ -186,7 +179,7 @@ const SearchAndFilter = ({ searchQuery, onSearchChange, activeTab, onTabChange, 
 };
 
 // Enhanced Project Card Component
-const ProjectCard = ({ project, type, onEdit, onViewApplications, onRateProject, tempRating, tempReview, onStarClick, onReviewChange, onSubmitRating }) => {
+const ProjectCard = ({ project, type, onEdit, onViewApplications, onDelete, onRateProject, tempRating, tempReview, onStarClick, onReviewChange, onSubmitRating }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -338,14 +331,23 @@ const ProjectCard = ({ project, type, onEdit, onViewApplications, onRateProject,
               <span className="btn-icon">👥</span>
               View Applications ({project.applicants_count || 0})
             </button>
-            {project.applicants_count === 0 && (
-              <button
-                onClick={() => onEdit(project.job_id)}
-                className="action-btn secondary"
-              >
-                <span className="btn-icon">✏️</span>
-                Edit Project
-              </button>
+            {(project.applicants_count === 0 || !project.applicants_count) && (
+              <div className="action-buttons-group">
+                <button
+                  onClick={() => onEdit(project.job_id)}
+                  className="action-btn secondary"
+                >
+                  <span className="btn-icon">✏️</span>
+                  Edit Project
+                </button>
+                <button
+                  onClick={() => onDelete(project.job_id)}
+                  className="action-btn danger"
+                >
+                  <span className="btn-icon">🗑️</span>
+                  Delete Project
+                </button>
+              </div>
             )}
           </>
         )}
@@ -434,7 +436,7 @@ function ClientProjects() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get('https://api.midhung.in/api/client-project/', {
+        const response = await axios.get(`${baseUrl}/api/client-project/`, {
           withCredentials: true,
         });
         const enrichedProjects = {
@@ -539,7 +541,7 @@ function ClientProjects() {
 
     try {
       const response = await axios.post(
-        'https://api.midhung.in/api/submit-review/',
+        `${baseUrl}/api/submit-review/`,
         { job_id: jobId, rating, review },
         { withCredentials: true }
       );
@@ -574,6 +576,68 @@ function ClientProjects() {
       Swal.fire({
         icon: 'error',
         title: 'Error',
+        text: errorMessage,
+        confirmButtonColor: '#dc3545',
+      });
+    }
+  };
+
+  const handleDeleteProject = async (jobId) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Delete Project?',
+        text: "This action cannot be undone. Are you sure you want to delete this project?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+      });
+
+      if (result.isConfirmed) {
+        // Show loading
+        Swal.fire({
+          title: 'Deleting...',
+          text: 'Please wait while we delete your project.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        const response = await axios.delete(`${baseUrl}/api/jobs/${jobId}/`, {
+          withCredentials: true,
+        });
+
+        // Remove the deleted project from state
+        const updateProjects = (projectList) => 
+          projectList.filter(project => project.job_id !== jobId);
+
+        setProjects(prev => ({
+          ...prev,
+          pending: updateProjects(prev.pending)
+        }));
+
+        setFilteredProjects(prev => ({
+          ...prev,
+          pending: updateProjects(prev.pending)
+        }));
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Deleted!',
+          text: response.data.message || 'Project has been successfully deleted.',
+          confirmButtonColor: '#28a745',
+          timer: 3000,
+          timerProgressBar: true,
+        });
+      }
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to delete project';
+      Swal.fire({
+        icon: 'error',
+        title: 'Delete Failed',
         text: errorMessage,
         confirmButtonColor: '#dc3545',
       });
@@ -711,6 +775,7 @@ function ClientProjects() {
                     project={project}
                     type={project.type}
                     onEdit={(jobId) => navigate(`/edit-project/${jobId}`)}
+                    onDelete={handleDeleteProject}
                     onViewApplications={(jobId) => navigate(`/job-applications/${jobId}`)}
                     tempRating={tempRating}
                     tempReview={tempReview}

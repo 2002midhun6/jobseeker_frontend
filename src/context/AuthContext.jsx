@@ -2,7 +2,7 @@ import React, { createContext, useReducer, useEffect, useState } from 'react';
 import axios from 'axios';
 
 export const AuthContext = createContext();
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // ADD THIS MISSING authReducer FUNCTION
 const authReducer = (state, action) => {
   switch (action.type) {
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Attempting to refresh token...');
       const response = await axios.post(
-        'https://api.midhung.in/api/token/refresh/',
+        `${baseUrl}/api/token/refresh/`,
         {}, 
         { 
           withCredentials: true,
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       try {
         console.log('Checking authentication status...');
-        const response = await axios.get('https://api.midhung.in/api/check-auth/', {
+        const response = await axios.get(`${baseUrl}/api/check-auth/`, {
           withCredentials: true,
         });
 
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }) => {
             dispatch({ type: 'LOGOUT' });
           } else {
             // If refresh worked, check auth again
-            const newResponse = await axios.get('https://api.midhung.in//api/check-auth/', {
+            const newResponse = await axios.get(`${baseUrl}//api/check-auth/`, {
               withCredentials: true,
             });
             
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('Attempting login...');
       const response = await axios.post(
-        'https://api.midhung.in/api/login/',
+        `${baseUrl}/api/login/`,
         { email, password },
         { withCredentials: true }
       );
@@ -177,7 +177,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // FIXED: Use the correct URL for logout
-      await axios.post('https://api.midhung.in/api/logout/', {}, { withCredentials: true });
+      await axios.post(`${baseUrl}/api/logout/`, {}, { withCredentials: true });
     } catch (error) {
       console.error('Logout error:', error);
     } finally {

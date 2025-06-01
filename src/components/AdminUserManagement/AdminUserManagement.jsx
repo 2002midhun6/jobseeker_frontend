@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminUserManagement.css';
 import AdminHeaderComp from '../AdminHeaderComp/AdminHeaderComp';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const AdminUserSpinner = ({ text = 'Loading...' }) => (
   <div className="admin-user-spinner-container">
@@ -176,7 +176,7 @@ function AdminUserManagement() {
       try {
         setLoading(true);
         setError('');
-        const response = await axios.get('https://api.midhung.in/api/users/', {
+        const response = await axios.get(`${baseUrl}/api/users/`, {
           withCredentials: true,
         });
         setUsers(response.data || []);
@@ -239,7 +239,7 @@ function AdminUserManagement() {
       setSuccessMessage('');
       
       const response = await axios.patch(
-        `https://api.midhung.in/api/users/${userId}/block-unblock/`,
+        `${baseUrl}/api/users/${userId}/block-unblock/`,
         { is_blocked: !isBlocked },
         { withCredentials: true }
       );

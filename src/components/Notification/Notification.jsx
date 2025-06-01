@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
 import './Notification.css'
-
+const baseUrl = import.meta.env.VITE_API_URL;
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -16,7 +16,7 @@ const Notifications = () => {
   // Helper function to get WebSocket token
   const getWebSocketToken = async () => {
     try {
-      const response = await axios.get('https://api.midhung.in/api/websocket-token/', {
+      const response = await axios.get(`${baseUrl}/api/websocket-token/`, {
         withCredentials: true
       });
       return response.data.access_token;
@@ -33,7 +33,7 @@ const Notifications = () => {
     // Fetch existing notifications
     const fetchNotifications = async () => {
       try {
-        const response = await axios.get('https://api.midhung.in/api/notifications/', {
+        const response = await axios.get(`${baseUrl}/api/notifications/`, {
           withCredentials: true
         });
         setNotifications(response.data);
@@ -149,7 +149,7 @@ const Notifications = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.post('https://api.midhung.in/api/notifications/mark-read/', {
+      await axios.post(`${baseUrl}/api/notifications/mark-read/`, {
         notification_id: notificationId
       }, {
         withCredentials: true
@@ -171,7 +171,7 @@ const Notifications = () => {
 
   const markAllAsRead = async () => {
     try {
-      await axios.post('https://api.midhung.in/api/notifications/mark-all-read/', {}, {
+      await axios.post(`${baseUrl}/api/notifications/mark-all-read/`, {}, {
         withCredentials: true
       });
       

@@ -1,7 +1,7 @@
 /* Enhanced Attractive ConversationsList CSS */
 
 .conversations-container {
-  max-width: 1200px;
+width: 100vw;
   margin: 0 auto;
   padding: 20px;
   background: linear-gradient(135deg, #f8fafc 0%, #e8f4fd 100%);
@@ -10,8 +10,7 @@
   position: relative;
 }
 
-/* Enhanced Header */
-./* Enhanced Header */
+/* Enhanced Header *//* Enhanced Header */
 .conversations-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 24px;

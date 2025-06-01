@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './ProfessionalJobDetails.css';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 function ProfessionalJobApplications() {
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ function ProfessionalJobApplications() {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const response = await axios.get('https://api.midhung.in/api/professional-job-applications/', {
+        const response = await axios.get(`${baseUrl}/api/professional-job-applications/`, {
           withCredentials: true,
         });
         console.log('Fetch Professional Applications Response:', response.data);
@@ -95,7 +95,7 @@ function ProfessionalJobApplications() {
 
     try {
       const response = await axios.post(
-        'https://api.midhung.in/api/professional-job-applications/',
+        `${baseUrl}/api/professional-job-applications/`,
         { application_id: applicationId, action },
         { withCredentials: true }
       );

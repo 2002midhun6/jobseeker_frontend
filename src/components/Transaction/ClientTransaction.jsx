@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import axios from 'axios';
 import './ClientTransaction.css';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
   const spinnerStyles = {
@@ -315,7 +315,7 @@ function ClientTransactions() {
     const fetchTransactions = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://api.midhung.in/api/client/transactions/', {
+        const response = await axios.get(`${baseUrl}/api/client/transactions/`, {
           withCredentials: true,
         });
         const transactionsData = response.data.transactions || [];

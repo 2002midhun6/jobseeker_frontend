@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
+const baseUrl = import.meta.env.VITE_API_URL;
 
 // Enhanced Spinner Component
 const AdminSpinner = ({ text = 'Loading...' }) => (
@@ -119,13 +120,13 @@ const AdminDashboard = () => {
 
         // Fetch all data concurrently
         const [userResponse, jobResponse, paymentResponse] = await Promise.all([
-          axios.get('https://api.midhung.in/api/users/counts/', {
+          axios.get(`${baseUrl}/api/users/counts/`, {
             withCredentials: true,
           }),
-          axios.get('https://api.midhung.in/api/jobs/counts/', {
+          axios.get(`${baseUrl}/api/jobs/counts/`, {
             withCredentials: true,
           }),
-          axios.get('https://api.midhung.in/api/payments/total/', {
+          axios.get(`${baseUrl}/api/payments/total/`, {
             withCredentials: true,
           })
         ]);

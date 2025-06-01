@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import './JobPage.css';
 import { AuthContext } from '../context/AuthContext';
 import ClinetHeaderComp from '../components/ClientDashboard/ClientDashboardHeader';
+const baseUrl = import.meta.env.VITE_API_URL;
 
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', inline = false }) => {
@@ -90,7 +91,8 @@ const FormField = ({
   max,
   step,
   rows = 4,
-  className = ''
+  className = '',
+  onBlur
 }) => {
   const [focused, setFocused] = useState(false);
   
@@ -120,7 +122,10 @@ const FormField = ({
             onChange={onChange}
             placeholder={placeholder}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={(e) => {
+              setFocused(false);
+              if (onBlur) onBlur(e);
+            }}
             rows={rows}
             className="field-input"
             required={required}
@@ -133,13 +138,155 @@ const FormField = ({
             onChange={onChange}
             placeholder={placeholder}
             onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onBlur={(e) => {
+              setFocused(false);
+              if (onBlur) onBlur(e);
+            }}
             min={min}
             max={max}
             step={step}
             className="field-input"
             required={required}
           />
+        )}
+        
+        {error && (
+          <div className="field-error">
+            <span className="error-icon">⚠️</span>
+            <span className="error-message">{error}</span>
+          </div>
+        )}
+        
+        {help && !error && (
+          <div className="field-help">
+            <span className="help-icon">💡</span>
+            <span className="help-message">{help}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// File Upload Component
+const FileUpload = ({ onFileSelect, selectedFile, error, help }) => {
+  const [dragOver, setDragOver] = useState(false);
+  
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      onFileSelect(files[0]);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleFileInput = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      onFileSelect(file);
+    }
+  };
+
+  const removeFile = () => {
+    onFileSelect(null);
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getFileIcon = (fileName) => {
+    const extension = fileName.toLowerCase().split('.').pop();
+    switch (extension) {
+      case 'pdf': return '📄';
+      case 'doc':
+      case 'docx': return '📝';
+      case 'xls':
+      case 'xlsx': return '📊';
+      case 'ppt':
+      case 'pptx': return '📋';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif': return '🖼️';
+      case 'zip':
+      case 'rar': return '📦';
+      default: return '📎';
+    }
+  };
+
+  return (
+    <div className="form-field">
+      <label className="field-label">
+        <span className="field-icon">📎</span>
+        <span className="label-text">
+          Project Documents
+          <span className="optional-text">(Optional)</span>
+        </span>
+      </label>
+      
+      <div className="field-wrapper">
+        {!selectedFile ? (
+          <div
+            className={`file-upload-zone ${dragOver ? 'drag-over' : ''} ${error ? 'has-error' : ''}`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => document.getElementById('file-input').click()}
+          >
+            <input
+              id="file-input"
+              type="file"
+              onChange={handleFileInput}
+              style={{ display: 'none' }}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.zip,.rar,.txt"
+            />
+            <div className="upload-content">
+              <span className="upload-icon">📁</span>
+              <div className="upload-text">
+                <p className="upload-primary">
+                  Drop files here or <span className="upload-link">browse</span>
+                </p>
+                <p className="upload-secondary">
+                  Support for documents, images, and archives up to 10MB<br />
+                  PDF, DOC, XLS, PPT, JPG, PNG, ZIP formats accepted
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="file-preview">
+            <div className="file-info">
+              <span className="file-icon">{getFileIcon(selectedFile.name)}</span>
+              <div className="file-details">
+                <div className="file-name">{selectedFile.name}</div>
+                <div className="file-size">{formatFileSize(selectedFile.size)}</div>
+              </div>
+              <button
+                type="button"
+                className="file-remove"
+                onClick={removeFile}
+                title="Remove file"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
         )}
         
         {error && (
@@ -196,7 +343,7 @@ const BudgetCalculator = ({ budget, advancePayment, onBudgetChange, onAdvanceCha
       {advancePayment && advancePercentage > 50 && (
         <div className="budget-warning">
           <span className="warning-icon">⚠️</span>
-          <span>High advance payment (>{Math.round(advancePercentage)}%). Consider reducing for better protection.</span>
+          <span>High advance payment ({Math.round(advancePercentage)}%). Consider reducing for better protection.</span>
         </div>
       )}
     </div>
@@ -213,6 +360,7 @@ function JobPage() {
     advance_payment: ''
   });
   
+  const [selectedFile, setSelectedFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -308,6 +456,38 @@ function JobPage() {
     return error;
   };
 
+  const validateFile = (file) => {
+    if (!file) return '';
+    
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'application/zip',
+      'application/x-rar-compressed',
+      'text/plain'
+    ];
+
+    if (file.size > maxSize) {
+      return 'File size must be less than 10MB';
+    }
+
+    if (!allowedTypes.includes(file.type)) {
+      return 'File type not supported. Please upload PDF, DOC, XLS, PPT, images, or archives';
+    }
+
+    return '';
+  };
+
   const validateForm = () => {
     const newErrors = {};
     const fields = ['title', 'description', 'budget', 'deadline', 'advance_payment'];
@@ -318,6 +498,14 @@ function JobPage() {
         newErrors[field] = error;
       }
     });
+
+    // Validate file if selected - CHANGED: Using 'document' instead of 'attachment'
+    if (selectedFile) {
+      const fileError = validateFile(selectedFile);
+      if (fileError) {
+        newErrors.document = fileError;
+      }
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -346,6 +534,19 @@ function JobPage() {
     setErrors({ ...errors, [name]: fieldError });
   };
 
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+    
+    // Validate file immediately - CHANGED: Using 'document' instead of 'attachment'
+    if (file) {
+      const fileError = validateFile(file);
+      setErrors({ ...errors, document: fileError });
+    } else {
+      const { document, ...restErrors } = errors;
+      setErrors(restErrors);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -371,21 +572,30 @@ function JobPage() {
     try {
       setLoading(true);
       
-      // Prepare data with proper type conversion
-      const submitData = {
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        budget: parseFloat(formData.budget).toFixed(2), // Ensure proper decimal format
-        deadline: formData.deadline,
-        advance_payment: formData.advance_payment ? parseFloat(formData.advance_payment).toFixed(2) : '' // Handle empty advance payment
-      };
-
-      console.log('Submitting data:', submitData); // Debug log
+      // Create FormData for file upload
+      const formDataToSubmit = new FormData();
       
-      const response = await axios.post('https://api.midhung.in/api/jobs/', submitData, {
+      // Append text fields
+      formDataToSubmit.append('title', formData.title.trim());
+      formDataToSubmit.append('description', formData.description.trim());
+      formDataToSubmit.append('budget', parseFloat(formData.budget).toFixed(2));
+      formDataToSubmit.append('deadline', formData.deadline);
+      
+      if (formData.advance_payment) {
+        formDataToSubmit.append('advance_payment', parseFloat(formData.advance_payment).toFixed(2));
+      }
+      
+      // CHANGED: Append file as 'document' instead of 'attachment' to match backend field
+      if (selectedFile) {
+        formDataToSubmit.append('document', selectedFile);
+      }
+
+      console.log('Submitting form data with file:', selectedFile ? selectedFile.name : 'No file');
+      
+      const response = await axios.post(`${baseUrl}/api/jobs/`, formDataToSubmit, {
         withCredentials: true,
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
         },
       });
       
@@ -397,16 +607,21 @@ function JobPage() {
         deadline: '',
         advance_payment: ''
       });
+      setSelectedFile(null);
       setErrors({});
       setTouched({});
       setError('');
       setLoading(false);
 
-      // Show success alert
+      // ENHANCED: Show success alert with document upload info
+      const documentInfo = response.data.document_url ? 
+        'Document uploaded successfully to Cloudinary!' : 
+        'Job posted without document.';
+      
       await Swal.fire({
         icon: 'success',
         title: 'Job Posted Successfully! 🎉',
-        text: 'Your job has been posted and is now visible to professionals.',
+        text: `Your job has been posted and is now visible to professionals. ${documentInfo}`,
         confirmButtonColor: '#10b981',
         confirmButtonText: 'View My Projects',
         showCancelButton: true,
@@ -418,15 +633,24 @@ function JobPage() {
         if (result.isConfirmed) {
           navigate('/client-project');
         } else if (result.dismiss === Swal.DismissReason.cancel) {
-          // Stay on the page to post another job
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
           navigate('/client-dashboard');
         }
       });
     } catch (err) {
-      console.error('Submit error:', err); // Debug log
-      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to post job';
+      console.error('Submit error:', err);
+      
+      // Enhanced error handling for file upload issues
+      let errorMessage = 'Failed to post job';
+      if (err.response?.data?.document) {
+        errorMessage = `Document upload error: ${err.response.data.document[0]}`;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
       setError(errorMessage);
       setLoading(false);
       
@@ -510,6 +734,14 @@ function JobPage() {
                     icon="📄"
                     help={`${formData.description.length}/1000 characters. Be specific about your requirements.`}
                     rows={6}
+                  />
+
+                  {/* CHANGED: Updated error prop to use 'document' instead of 'attachment' */}
+                  <FileUpload
+                    onFileSelect={handleFileSelect}
+                    selectedFile={selectedFile}
+                    error={errors.document}
+                    help="Upload project requirements, mockups, or reference documents. Files will be stored securely in Cloudinary."
                   />
 
                   <FormField
@@ -634,6 +866,14 @@ function JobPage() {
                     <div className="tip-content">
                       <strong>Realistic Timeline</strong>
                       <p>Allow adequate time for quality work</p>
+                    </div>
+                  </div>
+                  
+                  <div className="tip-item">
+                    <span className="tip-icon">📎</span>
+                    <div className="tip-content">
+                      <strong>Upload Documents</strong>
+                      <p>Share requirements and examples for clarity</p>
                     </div>
                   </div>
                   

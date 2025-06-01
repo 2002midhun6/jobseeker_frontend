@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ConversationsList.css';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
   const spinnerStyles = {
@@ -270,7 +270,7 @@ function ConversationsList({ userType = 'client' }) {
     const fetchConversations = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://api.midhung.in/api/conversations/', {
+        const response = await axios.get(`${baseUrl}/api/conversations/`, {
           withCredentials: true,
         });
         

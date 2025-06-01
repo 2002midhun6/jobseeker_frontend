@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
 import './AdminJobView.css';
-
+const baseUrl = import.meta.env.VITE_API_URL;
 // Enhanced Spinner Component
 const AdminJobsSpinner = ({ text = 'Loading...' }) => (
   <div className="admin-jobs-spinner-container">
@@ -237,7 +237,7 @@ function AdminJobs() {
     const fetchJobs = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://api.midhung.in/api/admin/jobs/', {
+        const response = await axios.get(`${baseUrl}/api/admin/jobs/`, {
           withCredentials: true,
         });
         
