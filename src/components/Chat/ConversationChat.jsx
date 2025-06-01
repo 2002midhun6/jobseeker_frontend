@@ -84,16 +84,15 @@ function ConversationChat() {
     console.log('Processing URL:', url); // Debug log
     
     // If it's already a full URL (starts with http/https), return as is
-    if (url.startsWith('http')) {
+    if (url.startsWith('https')) {
       console.log('hello')
-      console.log(url)
+      console.log('starting with http ',url)
       return url;
     }
     
     // If it starts with /media/, construct full URL with baseUrl
     if (url.startsWith('/media/')) {
-      console.log('hi')
-      console.log(url)
+      console.log('starting with media',url)
       return `${baseUrl}${url}`;
     }
     
@@ -144,7 +143,7 @@ function ConversationChat() {
   // IMPROVED: Prevent infinite recovery loops for documents
   const handleDocumentClick = async (e, messageId, originalUrl) => {
     e.preventDefault();
-    console.log(originalUrls)
+    console.log(originalUrl)
     // Check if we've already tried this file
     if (failedFiles.has(messageId)) {
       alert('Sorry, this file is not available.');
