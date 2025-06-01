@@ -144,7 +144,7 @@ function ConversationChat() {
   // IMPROVED: Prevent infinite recovery loops for documents
   const handleDocumentClick = async (e, messageId, originalUrl) => {
     e.preventDefault();
-    
+    console.log(originalUrls)
     // Check if we've already tried this file
     if (failedFiles.has(messageId)) {
       alert('Sorry, this file is not available.');
