@@ -1,27 +1,12 @@
 import React, { useState, useEffect, useRef ,useContext} from 'react';
 import './VideoCall.css';
 import { AuthContext } from '../../context/AuthContext';
-
 const baseUrl = import.meta.env.VITE_API_URL;
-
 const ICE_SERVERS = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
   ],
-};
-
-// Helper function to get WebSocket URL from HTTP URL
-const getWebSocketUrl = (httpUrl) => {
-  try {
-    const url = new URL(httpUrl);
-    const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${wsProtocol}//${url.host}`;
-  } catch (error) {
-    console.error('Error parsing base URL:', error);
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${wsProtocol}//${window.location.host}`;
-  }
 };
 
 function VideoCall({ jobId, userInfo, onEndCall }) {
@@ -41,109 +26,113 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
   const [remoteUserReady, setRemoteUserReady] = useState(false);
+  
 
-  // Debug logging
-  useEffect(() => {
-    console.log('VideoCall Debug Info:');
-    console.log('- baseUrl:', baseUrl);
-    console.log('- jobId:', jobId);
-    console.log('- userInfo:', userInfo);
-    console.log('- socketConnected:', socketConnected);
-    console.log('- socketError:', socketError);
-  }, [baseUrl, jobId, userInfo, socketConnected, socketError]);
 
   // Setup WebSocket connection
-  useEffect(() => {
-    const connectWebSocket = async () => {
-      try {
-        if (socket) {
-          socket.close();
-        }
+  // Replace this section in your VideoCall component:
 
-        console.log('Getting video call WebSocket auth token...');
-        // FIXED: Use baseUrl instead of hardcoded URL
-        const response = await fetch(`${baseUrl}/api/ws-auth-token/`, {
-          method: 'GET',
-          credentials: 'include',
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to get auth token: ${response.status} ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        const token = data.access_token;
-
-        if (!token) {
-          throw new Error('No WebSocket auth token received');
-        }
-
-        // FIXED: Proper WebSocket URL construction
-        const wsBaseUrl = getWebSocketUrl(baseUrl);
-        const wsUrl = `${wsBaseUrl}/ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
-        console.log('Connecting to video call WebSocket:', wsUrl);
-
-        const ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-          console.log('Video call WebSocket connected successfully');
-          setSocketConnected(true);
-          setSocketError(null);
-        };
-
-        ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            console.log('Received video call message:', data);
-            handleWebSocketMessage(data);
-          } catch (error) {
-            console.error('Error parsing video call message:', error);
-          }
-        };
-
-        ws.onerror = (error) => {
-          console.error('Video call WebSocket error:', error);
-          setSocketConnected(false);
-          setSocketError('Connection error. Please try again.');
-        };
-
-        // IMPROVED: Better error handling
-        ws.onclose = (event) => {
-          console.log(`Video call WebSocket closed: code=${event.code}, reason=${event.reason}`);
-          console.log('Close event details:', event);
-          setSocketConnected(false);
-          
-          if (event.code === 4001) {
-            setSocketError('Authentication failed. Please log in again.');
-          } else if (event.code === 4003) {
-            setSocketError('You do not have permission to join this call.');
-          } else if (event.code === 1006) {
-            setSocketError('Connection failed - check your internet connection and try again.');
-          } else {
-            setSocketError(`Connection closed (code: ${event.code}). Please try again.`);
-          }
-        };
-
-        setSocket(ws);
-      } catch (error) {
-        console.error('Failed to connect to video call:', error);
-        setSocketConnected(false);
-        setSocketError(`Connection failed: ${error.message}`);
-      }
-    };
-
-    if (userInfo && jobId) {
-      connectWebSocket();
-    }
-
-    // Cleanup on unmount
-    return () => {
-      cleanupCall();
+// Setup WebSocket connection
+useEffect(() => {
+  const connectWebSocket = async () => {
+    try {
       if (socket) {
         socket.close();
       }
-    };
-  }, [jobId, userInfo]); // Added userInfo as dependency
+
+      console.log('Getting video call WebSocket auth token...');
+      const response = await fetch('https://api.midhung.in/api/ws-auth-token/', {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to get auth token: ${response.status}`);
+      }
+      
+      const data = response.json();
+      const token = data.access_token;
+
+      if (!token) {
+        throw new Error('No WebSocket auth token received');
+      }
+
+      // FIXED: Proper WebSocket URL construction
+      // Extract hostname from baseUrl and construct proper WebSocket URL
+      const getWebSocketUrl = (httpUrl) => {
+        try {
+          const url = new URL(httpUrl);
+          const wsProtocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+          return `${wsProtocol}//${url.host}`;
+        } catch (error) {
+          console.error('Error parsing base URL:', error);
+          // Fallback
+          return 'wss://api.midhung.in';
+        }
+      };
+
+      const wsBaseUrl = getWebSocketUrl(baseUrl);
+      const wsUrl = `${wsBaseUrl}/ws/video-call/${jobId}/?token=${encodeURIComponent(token)}`;
+      
+      console.log('Base URL:', baseUrl);
+      console.log('WebSocket Base URL:', wsBaseUrl);
+      console.log('Connecting to video call WebSocket:', wsUrl);
+
+      const ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('Video call WebSocket connected successfully');
+        setSocketConnected(true);
+        setSocketError(null);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Received video call message:', data);
+          handleWebSocketMessage(data);
+        } catch (error) {
+          console.error('Error parsing video call message:', error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('Video call WebSocket error:', error);
+        setSocketConnected(false);
+        setSocketError('Connection error. Please try again.');
+      };
+
+      ws.onclose = (event) => {
+        console.log(`Video call WebSocket closed: code=${event.code}`);
+        setSocketConnected(false);
+        
+        if (event.code === 4001) {
+          setSocketError('Authentication failed. Please log in again.');
+        } else if (event.code === 4003) {
+          setSocketError('You do not have permission to join this call.');
+        } else {
+          setSocketError('Connection closed. Please try again.');
+        }
+      };
+
+      setSocket(ws);
+    } catch (error) {
+      console.error('Failed to connect to video call:', error);
+      setSocketConnected(false);
+      setSocketError(`Connection failed: ${error.message}`);
+    }
+  };
+
+  connectWebSocket();
+
+  // Cleanup on unmount
+  return () => {
+    cleanupCall();
+    if (socket) {
+      socket.close();
+    }
+  };
+}, [jobId]);
 
   // Process buffered ICE candidates after remote description is set
   const processBufferedIceCandidates = () => {
@@ -277,6 +266,7 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
             console.log('Unknown message type:', eventType);
     }
 };
+  
 
   // Initialize media devices and get local stream
   const initializeMediaDevices = async () => {
@@ -307,24 +297,22 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
       throw error;
     }
   };
-
-  // Add this to your useEffect that runs when remoteStream changes
-  useEffect(() => {
-      if (remoteStream) {
-        console.log('Remote stream received with tracks:', 
-          remoteStream.getTracks().map(t => `${t.kind} (enabled: ${t.enabled})`).join(', ')
-        );
-        
-        // Check if tracks are actually active
-        remoteStream.getTracks().forEach(track => {
-          console.log(`Remote ${track.kind} track ready:`, track.readyState);
-          track.onended = () => console.log(`Remote ${track.kind} track ended`);
-          track.onmute = () => console.log(`Remote ${track.kind} track muted`);
-          track.onunmute = () => console.log(`Remote ${track.kind} track unmuted`);
-        });
-      }
-    }, [remoteStream]);
-
+// Add this to your useEffect that runs when remoteStream changes
+useEffect(() => {
+    if (remoteStream) {
+      console.log('Remote stream received with tracks:', 
+        remoteStream.getTracks().map(t => `${t.kind} (enabled: ${t.enabled})`).join(', ')
+      );
+      
+      // Check if tracks are actually active
+      remoteStream.getTracks().forEach(track => {
+        console.log(`Remote ${track.kind} track ready:`, track.readyState);
+        track.onended = () => console.log(`Remote ${track.kind} track ended`);
+        track.onmute = () => console.log(`Remote ${track.kind} track muted`);
+        track.onunmute = () => console.log(`Remote ${track.kind} track unmuted`);
+      });
+    }
+  }, [remoteStream]);
   // Create RTCPeerConnection
   const createPeerConnection = (stream) => {
     console.log('Creating peer connection...');
@@ -385,42 +373,42 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
     peerConnectionRef.current = peerConnection;
     return peerConnection;
   };
-
-  // Add this to your VideoCall component
-  useEffect(() => {
-      if (peerConnectionRef.current) {
-        const pc = peerConnectionRef.current;
-        
-        pc.onconnectionstatechange = () => {
-          console.log(`Connection state changed to: ${pc.connectionState}`);
-          if (pc.connectionState === 'connected') {
-            setCallStatus('connected');
-            console.log('Connection established successfully!');
-          } else if (pc.connectionState === 'failed' || pc.connectionState === 'closed') {
-            console.error(`Connection failed or closed: ${pc.connectionState}`);
-            setSocketError('Connection failed. Please try again.');
-            cleanupCall();
-          }
-        };
-        
-        pc.oniceconnectionstatechange = () => {
-          console.log(`ICE connection state changed to: ${pc.iceConnectionState}`);
-        };
-        
-        pc.onicegatheringstatechange = () => {
-          console.log(`ICE gathering state changed to: ${pc.iceGatheringState}`);
-        };
-        
-        pc.onsignalingstatechange = () => {
-          console.log(`Signaling state changed to: ${pc.signalingState}`);
-        };
-      }
-    }, [peerConnectionRef.current]);
-
+// Add this to your VideoCall component
+useEffect(() => {
+    if (peerConnectionRef.current) {
+      const pc = peerConnectionRef.current;
+      
+      pc.onconnectionstatechange = () => {
+        console.log(`Connection state changed to: ${pc.connectionState}`);
+        if (pc.connectionState === 'connected') {
+          setCallStatus('connected');
+          console.log('Connection established successfully!');
+        } else if (pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+          console.error(`Connection failed or closed: ${pc.connectionState}`);
+          setSocketError('Connection failed. Please try again.');
+          cleanupCall();
+        }
+      };
+      
+      pc.oniceconnectionstatechange = () => {
+        console.log(`ICE connection state changed to: ${pc.iceConnectionState}`);
+      };
+      
+      pc.onicegatheringstatechange = () => {
+        console.log(`ICE gathering state changed to: ${pc.iceGatheringState}`);
+      };
+      
+      pc.onsignalingstatechange = () => {
+        console.log(`Signaling state changed to: ${pc.signalingState}`);
+      };
+    }
+  }, [peerConnectionRef.current]);
   // Start a new call (caller)
-  const startCall = async () => {
+  // Update startCall to not immediately send an offer
+  // In VideoCall.jsx, modify the startCall function
+const startCall = async () => {
     if (!socketConnected) {
-      setSocketError('Cannot start call while disconnected. Please wait for connection.');
+      setSocketError('Cannot start call while disconnected');
       return;
     }
     
@@ -496,8 +484,7 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
         setCallStatus('idle');
         setSocketError(`Failed to create offer: ${error.message}`);
     }
-  };
-
+};
   // Accept incoming call
   const acceptIncomingCall = async () => {
     if (!incomingCall) return;
@@ -559,67 +546,68 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
   };
 
   // Handle call answer (caller)
-  const handleCallAnswered = async (data) => {
-      try {
-        console.log('Call answered:', data);
-        
-        if (!peerConnectionRef.current) {
-          console.error('No peer connection when receiving answer');
-          return;
-        }
-        
-        // Always process the answer, regardless of current state
-        console.log('Setting remote description from answer...');
-        await peerConnectionRef.current.setRemoteDescription(
-          new RTCSessionDescription(data.answer)
-        );
-        console.log('Remote SDP set successfully');
-        
-        // Process any buffered ICE candidates
-        processBufferedIceCandidates();
-        
-        setCallStatus('connecting');
-        console.log('Waiting for connection to establish...');
-        
-      } catch (error) {
-        console.error('Error handling call answer:', error);
-        setSocketError(`Connection error: ${error.message}`);
+  // In VideoCall.jsx, modify the handleCallAnswered function
+const handleCallAnswered = async (data) => {
+    try {
+      console.log('Call answered:', data);
+      
+      if (!peerConnectionRef.current) {
+        console.error('No peer connection when receiving answer');
+        return;
       }
-    };
+      
+      // Always process the answer, regardless of current state
+      console.log('Setting remote description from answer...');
+      await peerConnectionRef.current.setRemoteDescription(
+        new RTCSessionDescription(data.answer)
+      );
+      console.log('Remote SDP set successfully');
+      
+      // Process any buffered ICE candidates
+      processBufferedIceCandidates();
+      
+      setCallStatus('connecting');
+      console.log('Waiting for connection to establish...');
+      
+    } catch (error) {
+      console.error('Error handling call answer:', error);
+      setSocketError(`Connection error: ${error.message}`);
+    }
+  };
 
   // Handle new ICE candidate
-  const handleNewICECandidate = async (data) => {
-      try {
-        if (!peerConnectionRef.current) {
-          console.log('No peer connection when receiving ICE candidate, buffering for later');
-          iceCandidatesBuffer.current.push(data.ice_candidate);
-          return;
-        }
-        
-        if (!peerConnectionRef.current.remoteDescription) {
-          console.log('Remote description not set yet, buffering ICE candidate');
-          iceCandidatesBuffer.current.push(data.ice_candidate);
-          return;
-        }
-        
-        const iceCandidate = data.ice_candidate;
-        
-        if (!iceCandidate) {
-          console.error('Received null or undefined ICE candidate');
-          return;
-        }
-        
-        console.log('Adding ICE candidate:', iceCandidate);
-        
-        const candidate = new RTCIceCandidate(iceCandidate);
-        await peerConnectionRef.current.addIceCandidate(candidate);
-        console.log('Successfully added ICE candidate');
-        
-      } catch (error) {
-        console.error('Error adding ICE candidate:', error);
+  // In VideoCall.jsx, modify the handleNewICECandidate function
+const handleNewICECandidate = async (data) => {
+    try {
+      if (!peerConnectionRef.current) {
+        console.log('No peer connection when receiving ICE candidate, buffering for later');
+        iceCandidatesBuffer.current.push(data.ice_candidate);
+        return;
       }
-    };
-
+      
+      if (!peerConnectionRef.current.remoteDescription) {
+        console.log('Remote description not set yet, buffering ICE candidate');
+        iceCandidatesBuffer.current.push(data.ice_candidate);
+        return;
+      }
+      
+      const iceCandidate = data.ice_candidate;
+      
+      if (!iceCandidate) {
+        console.error('Received null or undefined ICE candidate');
+        return;
+      }
+      
+      console.log('Adding ICE candidate:', iceCandidate);
+      
+      const candidate = new RTCIceCandidate(iceCandidate);
+      await peerConnectionRef.current.addIceCandidate(candidate);
+      console.log('Successfully added ICE candidate');
+      
+    } catch (error) {
+      console.error('Error adding ICE candidate:', error);
+    }
+  };
   // Send ICE candidate to peer
   const sendICECandidate = (candidate) => {
     if (socket && socketConnected) {
@@ -706,7 +694,6 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
       setIsVideoOff(!isVideoOff);
     }
   };
-
   const testConnection = () => {
     if (!socketConnected) {
       alert("WebSocket not connected!");
