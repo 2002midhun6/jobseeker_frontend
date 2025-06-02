@@ -33,6 +33,9 @@ function VideoCall({ jobId, userInfo, onEndCall }) {
   // Replace this section in your VideoCall component:
 
 // Setup WebSocket connection
+// Replace this section in your VideoCall component:
+
+// Setup WebSocket connection
 useEffect(() => {
   const connectWebSocket = async () => {
     try {
@@ -50,7 +53,8 @@ useEffect(() => {
         throw new Error(`Failed to get auth token: ${response.status}`);
       }
       
-      const data = response.json();
+      // FIX: Add await keyword here
+      const data = await response.json();
       const token = data.access_token;
 
       if (!token) {
