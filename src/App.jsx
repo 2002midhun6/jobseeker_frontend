@@ -24,6 +24,7 @@ import ComplaintManagements from './pages/ClientComplaints';
 import AdminComplaint from './pages/AdminComplaints';
 import ProfessionalComplient from './pages/ProfessionalComplaint';
 import ProfessionalPayment from './pages/ProfessinalTransaction';
+import ClientProfile from './components/ClientProfile/ClientProfile';
 
 import ConversationChat from './components/Chat/ConversationChat'
 import ConversationsList from './components/Chat/ConversationsList'
@@ -93,6 +94,10 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/profile" element={  
+                <ProtectedRoute requiredRole="client">
+                  <ClientProfile /> 
+                </ProtectedRoute>} />
           <Route
             path="/professional-dashboard"
             element={

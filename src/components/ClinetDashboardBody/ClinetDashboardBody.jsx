@@ -3,9 +3,12 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../context/AuthContext';
+import ClientProfile from '../ClientProfile/ClientProfile'
 import './ClientDashboardBody.css';
-import EnhancedNotifications from './EnhancedNotifications' // Updated import
+import EnhancedNotifications from './EnhancedNotifications';
+
 const baseUrl = import.meta.env.VITE_API_URL;
+
 // Enhanced Spinner Component
 const Spinner = ({ size = 'medium', text = 'Loading...', fullPage = false }) => {
   const spinnerStyles = {
@@ -111,7 +114,6 @@ const ProjectCard = ({ project, type }) => {
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.08)';
       }}
     >
-      {/* Top gradient line */}
       <div style={{
         position: 'absolute',
         top: 0,
@@ -269,7 +271,6 @@ const StatCard = ({ title, value, subValue, color, icon, trend }) => (
     e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.08)';
   }}
   >
-    {/* Top gradient line */}
     <div style={{
       position: 'absolute',
       top: 0,
@@ -329,10 +330,10 @@ function ClientDashBoardContent() {
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
   const { user, isAuthenticated } = authContext || { user: null, isAuthenticated: false };
-
   const [projectData, setProjectData] = useState({ active: [], completed: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('projects'); // State for active tab
 
   // Calculate statistics
   const stats = {
@@ -407,7 +408,6 @@ function ClientDashBoardContent() {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        {/* Background Pattern */}
         <div style={{
           position: 'absolute',
           top: 0,
@@ -434,180 +434,231 @@ function ClientDashBoardContent() {
                 Welcome back, {user.name}!
               </h1>
               <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '18px', margin: '0', fontWeight: '400' }}>
-                Here's an overview of your projects and activities
+                {activeTab === 'projects' ? 'Here\'s an overview of your projects and activities' : 'Manage your personal and company information'}
               </p>
             </div>
-
-            {/* Enhanced Notifications - Now properly positioned */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '16px',
-            }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <EnhancedNotifications />
             </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div style={{
+            display: 'flex',
+            gap: '16px',
+            marginTop: '16px',
+          }}>
+            <button
+              style={{
+                backgroundColor: activeTab === 'projects' ? '#3b82f6' : '#6b7280',
+                color: 'white',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: '600',
+                transition: 'all 0.3s ease',
+              }}
+              onClick={() => setActiveTab('projects')}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'projects') {
+                  e.target.style.backgroundColor = '#4b5563';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'projects') {
+                  e.target.style.backgroundColor = '#6b7280';
+                }
+              }}
+            >
+              Projects
+            </button>
+            <button
+              style={{
+                backgroundColor: activeTab === 'profile' ? '#3b82f6' : '#6b7280',
+                color: 'white',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: '600',
+                transition: 'all 0.3s ease',
+              }}
+              onClick={() => setActiveTab('profile')}
+              onMouseEnter={(e) => {
+                if (activeTab !== 'profile') {
+                  e.target.style.backgroundColor = '#4b5563';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeTab !== 'profile') {
+                  e.target.style.backgroundColor = '#6b7280';
+                }
+              }}
+            >
+              Profile
+            </button>
           </div>
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ 
-          backgroundColor: 'white', 
-          borderRadius: '20px', 
-          margin: '20px 0',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-        }}>
-          <Spinner size="large" text="Loading your dashboard..." fullPage={true} />
-        </div>
-      ) : error ? (
-        <div style={{
-          backgroundColor: '#fef2f2',
-          color: '#dc2626',
-          padding: '20px',
-          borderRadius: '16px',
-          border: '1px solid #fecaca',
-          marginBottom: '24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}>
-          <span style={{ fontSize: '20px' }}>⚠️</span>
-          <div>
-            <strong>Error:</strong> {error}
-          </div>
-        </div>
-      ) : (
+      {/* Tab Content */}
+      {activeTab === 'projects' ? (
         <>
-          {/* Enhanced Statistics Cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '24px',
-            marginBottom: '40px'
-          }}>
-            <StatCard
-              title="Total Projects"
-              value={stats.totalProjects}
-              color="#3b82f6"
-              icon="📊"
-            />
-            <StatCard
-              title="Active Projects"
-              value={stats.activeProjects}
-              color="#10b981"
-              icon="🚀"
-            />
-            <StatCard
-              title="Completed Projects"
-              value={stats.completedProjects}
-              color="#8b5cf6"
-              icon="✅"
-            />
-            <StatCard
-              title="Client"
-            color="#8b5cf6"
-            />
-            {stats.avgRating && (
-              <StatCard
-                title="Average Rating"
-                value={`${stats.avgRating}/5`}
-                color="#ef4444"
-                icon="⭐"
-              />
-            )}
-          </div>
-
-          {/* Active Projects Section */}
-          {projectData.active.length > 0 && (
-            <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ 
-                color: '#1f2937', 
-                marginBottom: '24px',
-                fontSize: '28px',
-                fontWeight: '700',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}>
-                <span style={{ fontSize: '32px' ,color:'white' }}>🚀</span>
-                Active Projects ({projectData.active.length})
-              </h2>
-              {projectData.active.map((project, index) => (
-                <ProjectCard key={project.job_id || index} project={project} type="active" />
-              ))}
-            </div>
-          )}
-
-          {/* Completed Projects Section */}
-          {projectData.completed.length > 0 && (
-            <div style={{ marginBottom: '40px' }}>
-              <h2 style={{ 
-                color: '#1f2937', 
-                marginBottom: '24px',
-                fontSize: '28px',
-                fontWeight: '700',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}>
-                <span style={{ fontSize: '32px' ,color:'white'}}>✅</span>
-                Completed Projects ({projectData.completed.length})
-              </h2>
-              {projectData.completed.map((project, index) => (
-                <ProjectCard key={project.job_id || index} project={project} type="completed" />
-              ))}
-            </div>
-          )}
-
-          {/* Enhanced Empty State */}
-          {stats.totalProjects === 0 && (
-            <div style={{
-              backgroundColor: '#fff',
-              borderRadius: '24px',
-              padding: '64px 32px',
-              textAlign: 'center',
+          {loading ? (
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '20px', 
+              margin: '20px 0',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-              border: '1px solid #e8ecf0',
             }}>
-              <div style={{ fontSize: '80px', marginBottom: '24px' }}>📝</div>
-              <h3 style={{ color: '#1f2937', marginBottom: '12px', fontSize: '28px', fontWeight: '700' }}>
-                No Projects Yet
-              </h3>
-              <p style={{ color: '#6b7280', marginBottom: '32px', fontSize: '16px', lineHeight: '1.6' }}>
-                Start by creating your first project to connect with skilled professionals and bring your ideas to life.
-              </p>
-              <button
-                onClick={() => navigate('/create-job')}
-                style={{
-                  background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '16px 32px',
-                  borderRadius: '16px',
-                  fontSize: '16px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 12px 35px rgba(59, 130, 246, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.3)';
-                }}
-              >
-                <span style={{ fontSize: '18px' }}>🚀</span>
-                Create Your First Project
-              </button>
+              <Spinner size="large" text="Loading your dashboard..." fullPage={true} />
             </div>
+          ) : error ? (
+            <div style={{
+              backgroundColor: '#fef2f2',
+              color: '#dc2626',
+              padding: '20px',
+              borderRadius: '16px',
+              border: '1px solid #fecaca',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}>
+              <span style={{ fontSize: '20px' }}>⚠️</span>
+              <div>
+                <strong>Error:</strong> {error}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '24px',
+                marginBottom: '40px'
+              }}>
+                <StatCard
+                  title="Total Projects"
+                  value={stats.totalProjects}
+                  color="#3b82f6"
+                  icon="📊"
+                />
+                <StatCard
+                  title="Active Projects"
+                  value={stats.activeProjects}
+                  color="#10b981"
+                  icon="🚀"
+                />
+                <StatCard
+                  title="Completed Projects"
+                  value={stats.completedProjects}
+                  color="#8b5cf6"
+                  icon="✅"
+                />
+                {stats.avgRating && (
+                  <StatCard
+                    title="Average Rating"
+                    value={`${stats.avgRating}/5`}
+                    color="#ef4444"
+                    icon="⭐"
+                  />
+                )}
+              </div>
+
+              {projectData.active.length > 0 && (
+                <div style={{ marginBottom: '40px' }}>
+                  <h2 style={{ 
+                    color: '#1f2937', 
+                    marginBottom: '24px',
+                    fontSize: '28px',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                  }}>
+                    <span style={{ fontSize: '32px', color: 'white' }}>🚀</span>
+                    Active Projects ({projectData.active.length})
+                  </h2>
+                  {projectData.active.map((project, index) => (
+                    <ProjectCard key={project.job_id || index} project={project} type="active" />
+                  ))}
+                </div>
+              )}
+
+              {projectData.completed.length > 0 && (
+                <div style={{ marginBottom: '40px' }}>
+                  <h2 style={{ 
+                    color: '#1f2937', 
+                    marginBottom: '24px',
+                    fontSize: '28px',
+                    fontWeight: '700',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                  }}>
+                    <span style={{ fontSize: '32px', color: 'white' }}>✅</span>
+                    Completed Projects ({projectData.completed.length})
+                  </h2>
+                  {projectData.completed.map((project, index) => (
+                    <ProjectCard key={project.job_id || index} project={project} type="completed" />
+                  ))}
+                </div>
+              )}
+
+              {stats.totalProjects === 0 && (
+                <div style={{
+                  backgroundColor: '#fff',
+                  borderRadius: '24px',
+                  padding: '64px 32px',
+                  textAlign: 'center',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid #e8ecf0',
+                }}>
+                  <div style={{ fontSize: '80px', marginBottom: '24px' }}>📝</div>
+                  <h3 style={{ color: '#1f2937', marginBottom: '12px', fontSize: '28px', fontWeight: '700' }}>
+                    No Projects Yet
+                  </h3>
+                  <p style={{ color: '#6b7280', marginBottom: '32px', fontSize: '16px', lineHeight: '1.6' }}>
+                    Start by creating your first project to connect with skilled professionals and bring your ideas to life.
+                  </p>
+                  <button
+                    onClick={() => navigate('/create-job')}
+                    style={{
+                      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                      color: 'white',
+                      border: 'none',
+                      padding: '16px 32px',
+                      borderRadius: '16px',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 12px 35px rgba(59, 130, 246, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.3)';
+                    }}
+                  >
+                    <span style={{ fontSize: '18px' }}>🚀</span>
+                    Create Your First Project
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </>
+      ) : (
+        <ClientProfile />
       )}
     </div>
   );
