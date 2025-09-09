@@ -1,16 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './VerifyOtp.css';
+
 const baseUrl = import.meta.env.VITE_API_URL;
+
 function VerifyOTP() {
-  const [formData, setFormData] = useState({ email: '', otp: '' });
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Get email from navigation state, URL params, or empty string
+  const emailFromState = location.state?.email || new URLSearchParams(location.search).get('email') || '';
+  
+  const [formData, setFormData] = useState({ 
+    email: emailFromState, 
+    otp: '' 
+  });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isResendDisabled, setIsResendDisabled] = useState(false);
   const [isResendLoading, setIsResendLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  const navigate = useNavigate();
+  const [showEmailInput, setShowEmailInput] = useState(!emailFromState);
+
+  // If no email is provided, redirect to registration or show email input
+  useEffect(() => {
+    if (!emailFromState) {
+      setShowEmailInput(true);
+    }
+  }, [emailFromState]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -74,22 +92,40 @@ function VerifyOTP() {
         {success && <div className="success-message">{success}</div>}
         
         <p className="otp-description">
-          Please enter the verification code sent to your email address.
+          Please enter the verification code sent to {formData.email || 'your email address'}.
         </p>
         
         <form onSubmit={handleSubmit} className="verify-otp-form">
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+          {/* {showEmailInput && (
+            <div className="form-group">
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+          )} */}
+
+          {/* {!showEmailInput && (
+            <div className="form-group">
+              <label>Email</label>
+              <div className="email-display">
+                {formData.email}
+                <button 
+                  type="button" 
+                  className="change-email-btn"
+                  onClick={() => setShowEmailInput(true)}
+                >
+                  Change
+                </button>
+              </div>
+            </div>
+          )} */}
           
           <div className="form-group">
             <label htmlFor="otp">OTP Code</label>
@@ -108,6 +144,7 @@ function VerifyOTP() {
           <button
             type="submit"
             className="verify-button"
+            disabled={!formData.email}
           >
             Verify
           </button>

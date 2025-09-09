@@ -1,4 +1,4 @@
-// src/pages/signup.jsx
+
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -48,19 +48,24 @@ function Register() {
     e.preventDefault();
 
     if (!validateForm()) {
-      return;
+        return;
     }
 
     try {
-      await axios.post(`${baseUrl}/api/register/`, formData, {
-        withCredentials: true,
-      });
-      navigate("/verify-otp");
-      setServerError("");
+        const response = await axios.post(`${baseUrl}/api/register/`, formData, {
+            withCredentials: true,
+        });
+        navigate('/verify-otp', { state: { email: formData.email } });
+        setServerError("");
     } catch (error) {
-      setServerError(error.response?.data?.error || "Registration failed. Please try again.");
+        const errorMsg = error.response?.data?.error || "Registration failed. Please try again.";
+        if (errorMsg.includes("OTP sent")) {
+            setServerError("An OTP has been resent to your email.");
+        } else {
+            setServerError(errorMsg);
+        }
     }
-  };
+};
 
   return (
     <div className="register-container">

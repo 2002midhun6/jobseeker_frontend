@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminUserManagement.css';
 import AdminHeaderComp from '../AdminHeaderComp/AdminHeaderComp';
+
 const baseUrl = import.meta.env.VITE_API_URL;
-// Enhanced Spinner Component
+
+
 const AdminUserSpinner = ({ text = 'Loading...' }) => (
   <div className="admin-user-spinner-container">
     <div className="admin-user-loading-spinner"></div>
@@ -11,12 +13,13 @@ const AdminUserSpinner = ({ text = 'Loading...' }) => (
   </div>
 );
 
-// User Statistics Summary Component
+
 const UserStatsSummary = ({ users, filteredUsers }) => {
   const stats = {
     total: users.length,
-    active: users.filter(user => !user.is_blocked).length,
+    active: users.filter(user => !user.is_blocked && user.is_verified).length,
     blocked: users.filter(user => user.is_blocked).length,
+    unverified: users.filter(user => !user.is_verified).length, 
     clients: users.filter(user => user.role === 'client').length,
     professionals: users.filter(user => user.role === 'professional').length,
     admins: users.filter(user => user.role === 'admin').length,
@@ -38,6 +41,10 @@ const UserStatsSummary = ({ users, filteredUsers }) => {
         <p>{stats.blocked}</p>
       </div>
       <div className="user-stat-item">
+        <h4>Unverified</h4>
+        <p>{stats.unverified}</p>
+      </div>
+      <div className="user-stat-item">
         <h4>Clients</h4>
         <p>{stats.clients}</p>
       </div>
@@ -45,50 +52,87 @@ const UserStatsSummary = ({ users, filteredUsers }) => {
         <h4>Professionals</h4>
         <p>{stats.professionals}</p>
       </div>
-      <div className="user-stat-item">
-        <h4>Admins</h4>
-        <p>{stats.admins}</p>
+    </div>
+  );
+};
+
+
+const getUserStatus = (user) => {
+  if (!user.is_verified) return 'unverified';
+  if (user.is_blocked) return 'blocked';
+  return 'active';
+};
+
+
+const getStatusText = (user) => {
+  const status = getUserStatus(user);
+  switch (status) {
+    case 'unverified': return 'Unverified';
+    case 'blocked': return 'Blocked';
+    case 'active': return 'Active';
+    default: return 'Unknown';
+  }
+};
+
+
+const UserCard = ({ user, onBlockUnblock, onDeleteUser, onVerifyUser }) => {
+  const status = getUserStatus(user);
+  
+  return (
+    <div className="user-card">
+      <div className="user-card-header">
+        <div className="user-card-info">
+          <h4>{user.name}</h4>
+          <p>{user.email}</p>
+        </div>
+        <span className={`status-badge status-${status}`}>
+          {getStatusText(user)}
+        </span>
+      </div>
+      
+      <div className="user-card-details">
+        <div className="user-detail-item">
+          <span className="user-detail-label">Role</span>
+          <span className={`role-badge role-${user.role}`}>
+            {user.role}
+          </span>
+        </div>
+        <div className="user-detail-item">
+          <span className="user-detail-label">Status</span>
+          <span className="user-detail-value">{getStatusText(user)}</span>
+        </div>
+      </div>
+      
+      <div className="user-card-actions">
+        {!user.is_verified ? (
+          <>
+            <button
+              onClick={() => onVerifyUser(user.id)}
+              className="verify-button"
+            >
+              Verify User
+            </button>
+            <button
+              onClick={() => onDeleteUser(user.id)}
+              className="delete-button"
+            >
+              Delete User
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => onBlockUnblock(user.id, user.is_blocked)}
+            className={user.is_blocked ? 'unblock-button' : 'block-button'}
+          >
+            {user.is_blocked ? 'Unblock User' : 'Block User'}
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
-// User Card Component for Mobile
-const UserCard = ({ user, onBlockUnblock }) => (
-  <div className="user-card">
-    <div className="user-card-header">
-      <div className="user-card-info">
-        <h4>{user.name}</h4>
-        <p>{user.email}</p>
-      </div>
-      <span className={`status-badge ${user.is_blocked ? 'status-blocked' : 'status-active'}`}>
-        {user.is_blocked ? 'Blocked' : 'Active'}
-      </span>
-    </div>
-    
-    <div className="user-card-details">
-      <div className="user-detail-item">
-        <span className="user-detail-label">Role</span>
-        <span className={`role-badge role-${user.role}`}>
-          {user.role}
-        </span>
-      </div>
-      <div className="user-detail-item">
-        <span className="user-detail-label">Status</span>
-        <span className="user-detail-value">{user.is_blocked ? 'Blocked' : 'Active'}</span>
-      </div>
-    </div>
-    
-    <button
-      onClick={() => onBlockUnblock(user.id, user.is_blocked)}
-      className={user.is_blocked ? 'unblock-button' : 'block-button'}
-    >
-      {user.is_blocked ? 'Unblock User' : 'Block User'}
-    </button>
-  </div>
-);
 
-// Enhanced Pagination Component
 const PaginationControls = ({ totalItems, currentPage, onPageChange, itemsPerPage }) => {
   const pageCount = Math.ceil(totalItems.length / itemsPerPage);
   
@@ -97,16 +141,13 @@ const PaginationControls = ({ totalItems, currentPage, onPageChange, itemsPerPag
   const maxVisiblePages = 5;
   const pages = [];
   
-  // Calculate which pages to show
   let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
   let endPage = Math.min(pageCount, startPage + maxVisiblePages - 1);
   
-  // Adjust start page if we're near the end
   if (endPage - startPage + 1 < maxVisiblePages) {
     startPage = Math.max(1, endPage - maxVisiblePages + 1);
   }
 
-  // Add page numbers
   for (let i = startPage; i <= endPage; i++) {
     pages.push(i);
   }
@@ -116,7 +157,6 @@ const PaginationControls = ({ totalItems, currentPage, onPageChange, itemsPerPag
 
   return (
     <div style={{ marginTop: '32px' }}>
-      {/* Pagination Info */}
       <div style={{
         textAlign: 'center',
         marginBottom: '16px',
@@ -127,7 +167,6 @@ const PaginationControls = ({ totalItems, currentPage, onPageChange, itemsPerPag
         Showing {startIndex} to {endIndex} of {totalItems.length} users
       </div>
 
-      {/* Pagination Controls */}
       <div className="pagination">
         <button
           disabled={currentPage === 1}
@@ -170,7 +209,7 @@ function AdminUserManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Fetch users on component mount
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -193,11 +232,10 @@ function AdminUserManagement() {
     fetchUsers();
   }, []);
 
-  // Filter and search users
+ 
   useEffect(() => {
     let filtered = users;
 
-    // Apply search filter
     if (searchQuery.trim()) {
       filtered = filtered.filter(user =>
         user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -206,13 +244,15 @@ function AdminUserManagement() {
       );
     }
 
-    // Apply type filter
     switch (filterType) {
       case 'active':
-        filtered = filtered.filter(user => !user.is_blocked);
+        filtered = filtered.filter(user => !user.is_blocked && user.is_verified);
         break;
       case 'blocked':
         filtered = filtered.filter(user => user.is_blocked);
+        break;
+      case 'unverified':
+        filtered = filtered.filter(user => !user.is_verified);
         break;
       case 'client':
         filtered = filtered.filter(user => user.role === 'client');
@@ -224,15 +264,14 @@ function AdminUserManagement() {
         filtered = filtered.filter(user => user.role === 'admin');
         break;
       default:
-        // 'all' - no additional filtering
         break;
     }
 
     setFilteredUsers(filtered);
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
   }, [users, searchQuery, filterType]);
 
-  // Handle block/unblock action
+ 
   const handleBlockUnblock = async (userId, isBlocked) => {
     try {
       setError('');
@@ -244,46 +283,89 @@ function AdminUserManagement() {
         { withCredentials: true }
       );
       
-      // Update the user list after successful block/unblock
       const updatedUsers = users.map(user =>
         user.id === userId ? { ...user, is_blocked: !isBlocked } : user
       );
       setUsers(updatedUsers);
       
-      // Show success message
       setSuccessMessage(response.data.message || `User ${!isBlocked ? 'blocked' : 'unblocked'} successfully`);
-      
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
       
     } catch (err) {
       const errorMessage = err.response?.data?.error || 'Failed to update user status';
       setError(errorMessage);
-      console.error('Error updating user status:', err);
-      
-      // Clear error message after 5 seconds
       setTimeout(() => setError(''), 5000);
     }
   };
 
-  // Handle search input change
+
+  const handleVerifyUser = async (userId) => {
+    try {
+      setError('');
+      setSuccessMessage('');
+      
+      const response = await axios.patch(
+        `${baseUrl}/api/users/${userId}/verify/`,
+        {},
+        { withCredentials: true }
+      );
+      
+      const updatedUsers = users.map(user =>
+        user.id === userId ? { ...user, is_verified: true } : user
+      );
+      setUsers(updatedUsers);
+      
+      setSuccessMessage('User verified successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to verify user';
+      setError(errorMessage);
+      setTimeout(() => setError(''), 5000);
+    }
+  };
+
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this unverified user? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setError('');
+      setSuccessMessage('');
+      
+      await axios.delete(
+        `${baseUrl}/api/users/${userId}/`,
+        { withCredentials: true }
+      );
+      
+      const updatedUsers = users.filter(user => user.id !== userId);
+      setUsers(updatedUsers);
+      
+      setSuccessMessage('User deleted successfully');
+      setTimeout(() => setSuccessMessage(''), 3000);
+      
+    } catch (err) {
+      const errorMessage = err.response?.data?.error || 'Failed to delete user';
+      setError(errorMessage);
+      setTimeout(() => setError(''), 5000);
+    }
+  };
+
   const handleSearchChange = (e) => {
     setSearchQuery(e.target.value);
   };
 
-  // Handle filter type change
   const handleFilterChange = (type) => {
     setFilterType(type);
   };
 
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Paginate users
   const paginate = (items, page) => {
     const startIndex = (page - 1) * itemsPerPage;
     return items.slice(startIndex, startIndex + itemsPerPage);
@@ -295,10 +377,8 @@ function AdminUserManagement() {
       <main>
         <h1>User Management</h1>
         
-        {/* User Statistics */}
         {!loading && !error && <UserStatsSummary users={users} filteredUsers={filteredUsers} />}
         
-        {/* Search Bar */}
         <div className="search-bar">
           <input
             type="text"
@@ -309,7 +389,7 @@ function AdminUserManagement() {
           />
         </div>
         
-        {/* Filter Tabs */}
+        {/* Updated Filter Tabs */}
         <div className="filter-tabs">
           <button
             className={`filter-tab ${filterType === 'all' ? 'active' : ''}`}
@@ -323,7 +403,7 @@ function AdminUserManagement() {
             onClick={() => handleFilterChange('active')}
           >
             <span>✅</span>
-            Active ({users.filter(u => !u.is_blocked).length})
+            Active ({users.filter(u => !u.is_blocked && u.is_verified).length})
           </button>
           <button
             className={`filter-tab ${filterType === 'blocked' ? 'active' : ''}`}
@@ -331,6 +411,13 @@ function AdminUserManagement() {
           >
             <span>🚫</span>
             Blocked ({users.filter(u => u.is_blocked).length})
+          </button>
+          <button
+            className={`filter-tab ${filterType === 'unverified' ? 'active' : ''}`}
+            onClick={() => handleFilterChange('unverified')}
+          >
+            <span>⏳</span>
+            Unverified ({users.filter(u => !u.is_verified).length})
           </button>
           <button
             className={`filter-tab ${filterType === 'client' ? 'active' : ''}`}
@@ -348,17 +435,14 @@ function AdminUserManagement() {
           </button>
         </div>
         
-        {/* Success Message */}
         {successMessage && (
           <div className="success-message">{successMessage}</div>
         )}
         
-        {/* Error Message */}
         {error && (
           <div className="error-message">{error}</div>
         )}
         
-        {/* Loading State */}
         {loading ? (
           <AdminUserSpinner text="Loading users..." />
         ) : filteredUsers.length === 0 ? (
@@ -369,7 +453,7 @@ function AdminUserManagement() {
           </div>
         ) : (
           <>
-            {/* Desktop Table View */}
+            
             <table className="user-table">
               <thead>
                 <tr>
@@ -381,45 +465,55 @@ function AdminUserManagement() {
                 </tr>
               </thead>
               <tbody className="user-table-data">
-                {paginate(filteredUsers, currentPage).map(user => (
-                  <tr key={user.id}>
-                    <td>{user.email}</td>
-                    <td>{user.name}</td>
-                    <td>
-                      <span className={`role-badge role-${user.role}`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${user.is_blocked ? 'status-blocked' : 'status-active'}`}>
-                        {user.is_blocked ? 'Blocked' : 'Active'}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => handleBlockUnblock(user.id, user.is_blocked)}
-                        className={user.is_blocked ? 'unblock-button' : 'block-button'}
-                      >
-                        {user.is_blocked ? 'Unblock' : 'Block'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {paginate(filteredUsers, currentPage).map(user => {
+                  const status = getUserStatus(user);
+                  return (
+                    <tr key={user.id}>
+                      <td>{user.email}</td>
+                      <td>{user.name}</td>
+                      <td>
+                        <span className={`role-badge role-${user.role}`}>
+                          {user.role}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{color:'black'}} className={`status-badge status-${status}`}>
+                          {getStatusText(user)}
+                        </span>
+                      </td>
+                      <td>
+                        {!user.is_verified ? (
+                          <div className="action-buttons">
+                            
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleBlockUnblock(user.id, user.is_blocked)}
+                            className={user.is_blocked ? 'unblock-button' : 'block-button'}
+                          >
+                            {user.is_blocked ? 'Unblock' : 'Block'}
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
-            {/* Mobile Card View */}
+            {/* Updated Mobile Card View */}
             <div className="user-cards">
               {paginate(filteredUsers, currentPage).map(user => (
                 <UserCard 
                   key={user.id} 
                   user={user} 
                   onBlockUnblock={handleBlockUnblock}
+                  onDeleteUser={handleDeleteUser}
+                  onVerifyUser={handleVerifyUser}
                 />
               ))}
             </div>
 
-            {/* Pagination */}
             <PaginationControls
               totalItems={filteredUsers}
               currentPage={currentPage}
