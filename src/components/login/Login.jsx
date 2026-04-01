@@ -70,7 +70,7 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Start spinner
+    setLoading(true); 
     try {
       setError('');
       setMessage('');
@@ -132,13 +132,13 @@ function Login() {
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to reset password');
     } finally {
-      setLoading(false); // Stop spinner
+      setLoading(false); 
     }
   };
 
   const handleResendOTP = async () => {
     if (isResendDisabled || isResendLoading || !resetData.email) return;
-    setIsResendLoading(true); // Start resend spinner
+    setIsResendLoading(true); 
     try {
       setError('');
       setMessage('');
@@ -151,7 +151,7 @@ function Login() {
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to resend OTP');
     } finally {
-      setIsResendLoading(false); // Stop resend spinner
+      setIsResendLoading(false); 
     }
   };
 
