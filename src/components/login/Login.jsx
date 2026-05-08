@@ -181,6 +181,52 @@ function Login() {
             <Spinner size="medium" text="Processing..." />
           </div>
         )}
+        {/* Demo Credentials */}
+{!forgotPassword && (
+  <div style={{ marginBottom: '16px' }}>
+    <p style={{ fontSize: '12px', color: '#888', marginBottom: '8px', textAlign: 'center' }}>
+      🔑 Demo Accounts — click to auto-fill
+    </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {[
+        { label: 'Client', email: 'doyado4692@azucore.com', password: 'Midhun@2002', color: '#e8f5e9', border: '#4caf50', badge: '#4caf50' },
+        { label: 'Professional', email: 'kopote3635@protonza.com', password: 'Midhun@2002', color: '#e3f2fd', border: '#2196f3', badge: '#2196f3' },
+      ].map(({ label, email, password, color, border, badge }) => (
+        <div
+          key={label}
+          onClick={() => setFormData({ email, password })}
+          style={{
+            background: color,
+            border: `1px dashed ${border}`,
+            borderRadius: '8px',
+            padding: '10px 14px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <span style={{
+            background: badge,
+            color: '#fff',
+            fontSize: '11px',
+            fontWeight: 700,
+            padding: '2px 8px',
+            borderRadius: '12px',
+            minWidth: '72px',
+            textAlign: 'center',
+          }}>
+            {label}
+          </span>
+          <div>
+            <p style={{ margin: 0, fontSize: '12px', color: '#333' }}>{email}</p>
+            <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>Password: {password}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {!forgotPassword ? (
           <>

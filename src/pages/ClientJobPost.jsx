@@ -7,7 +7,7 @@ import { AuthContext } from '../context/AuthContext';
 import ClinetHeaderComp from '../components/ClientDashboard/ClientDashboardHeader';
 const baseUrl = import.meta.env.VITE_API_URL;
 
-// Enhanced Spinner Component
+
 const Spinner = ({ size = 'medium', text = 'Loading...', inline = false }) => {
   const spinnerStyles = {
     container: {
