@@ -189,8 +189,8 @@ function Login() {
     </p>
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
       {[
-        { label: 'Client', email: 'doyado4692@azucore.com', password: 'Midhun@2002', color: '#e8f5e9', border: '#4caf50', badge: '#4caf50' },
-        { label: 'Professional', email: 'kopote3635@protonza.com', password: 'Midhun@2002', color: '#e3f2fd', border: '#2196f3', badge: '#2196f3' },
+        { label: 'Client', email: 'niciv99086@disiok.com', password: 'Midhun@2002', color: '#e8f5e9', border: '#4caf50', badge: '#4caf50' },
+        { label: 'Professional', email: 'ceric46997@jctoto.com', password: 'Midhun@2002', color: '#e3f2fd', border: '#2196f3', badge: '#2196f3' },
       ].map(({ label, email, password, color, border, badge }) => (
         <div
           key={label}
